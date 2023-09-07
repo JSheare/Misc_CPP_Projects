@@ -19,13 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\..\Desktop\LinkedList.cpp" />
+    <ClCompile Include="LinkedList.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\..\Desktop\CIter.h" />
-    <ClInclude Include="..\..\..\..\..\..\Desktop\Iter.h" />
-    <ClInclude Include="..\..\..\..\..\..\Desktop\Link.h" />
-    <ClInclude Include="..\..\..\..\..\..\Desktop\List.h" />
+    <ClInclude Include="CIter.h" />
+    <ClInclude Include="Iter.h" />
+    <ClInclude Include="Link.h" />
+    <ClInclude Include="List.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
