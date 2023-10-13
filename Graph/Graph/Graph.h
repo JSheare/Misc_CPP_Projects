@@ -13,7 +13,7 @@ namespace JADT
 	class Graph
 	{
 	private:
-		List<Vertex<T, U>*> m_vertList{};
+		List<Vertex<T, U>*> m_vertList{};  // You should eventually redo this with a hash map. Same with the vertices
 		List<T> m_vertKeys{};
 		int m_numVerts{};
 
@@ -110,7 +110,7 @@ namespace JADT
 			if (contains(key))
 			{
 				Vertex<T, U>& targetVert{ getVertex(key) };
-				for (T vertKey : m_vertKeys)  // Removes any edges to the vertex we're removing
+				for (T& vertKey : m_vertKeys)  // Removes any edges to the vertex we're removing
 				{
 					if (key == vertKey)
 					{

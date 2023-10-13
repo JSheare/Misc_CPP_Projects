@@ -17,7 +17,6 @@ namespace JADT
 		int m_length{ 0 };
 		Link<T>* m_head{ nullptr };
 		Link<T>* m_tail{ nullptr };
-		bool m_sorted{ false };
 
 	public:
 		List() = default;
@@ -89,14 +88,12 @@ namespace JADT
 
 		T& operator[](int index)
 		{
-			Link<T>* currentLink{ getLink(index) };
-			return currentLink->m_data;
+			return getLink(index)->m_data;
 		}
 
 		const T& operator[](int index) const
 		{
-			Link<T>* currentLink{ getLink(index) };
-			return currentLink->m_data;
+			return getLink(index)->m_data;
 		}
 
 		friend bool operator==(const List<T>& list1, const List<T>& list2)
@@ -114,11 +111,17 @@ namespace JADT
 		friend std::ostream& operator<<(std::ostream& out, List<T>& list)
 		{
 			out << '[';
-			for (int index{ 0 }; index < list.m_length; ++index)
+			Link<T>* currentLink{ list.m_head };
+			int index{ 0 };
+			while (currentLink)
 			{
-				out << list[index];
+				out << currentLink->m_data;
 				if (index != (list.m_length - 1))
+				{
 					out << ", ";
+				}
+				++index;
+				currentLink = currentLink->m_next;
 			}
 			out << ']';
 			return out;
@@ -221,9 +224,13 @@ namespace JADT
 		List<T> slice(int start, int stop) const
 		{
 			List<T> slice{};
-			for (int index{ start }; index < stop; ++index)
+			Link<T>* currentLink{ getLink(start) };
+			int index{ start };
+			while (index < stop)
 			{
-				slice.append((*this)[index]);
+				slice.append(currentLink->m_data);
+				++index;
+				currentLink = currentLink->m_next;
 			}
 
 			return slice;
@@ -233,68 +240,36 @@ namespace JADT
 		void sort()  // overload for default
 		{
 			mergeSort(*this, ascendingComparison);
-			m_sorted = true;
 		}
 
 		template <typename U>  // Custom comparison function
 		void sort(bool(*comparisonFcn)(U, U))
 		{
 			mergeSort(*this, comparisonFcn);
-			m_sorted = true;
 		}
 
 		// Finds the requested entry (if it exists) in the list and returns its index. Otherwise returns -1
 		int index(T data) const
 		{
-			int index{ -1 };
-			// Binary search algorithm
-			if (m_sorted)// Binary search requires a sorted list to be efficient
+			Link<T>* currentLink{ this->m_head };
+			int index{ 0 };
+			while (currentLink)
 			{
-				int first{ 0 };
-				int last{ m_length - 1 };
+				if (currentLink->m_data == data)
+					return index;
 
-				while (first <= last)
-				{
-					int midpoint = (first + last) / 2;
-					if ((*this)[midpoint] == data)
-					{
-						index = midpoint;
-						break;
-					}
-					else
-					{
-						if (data < ((*this)[midpoint]))
-						{
-							last = midpoint - 1;
-							}
-							else
-							{
-								first = midpoint + 1;
-							}
-						}
-					}
-			}
-			// Linear search algorithm
-			else
-			{
-				for (int i{ 0 }; i < m_length; ++i)
-				{
-					if ((*this)[i] == data)
-					{
-						index = i;
-						break;
-					}
-				}
+				++index;
+				currentLink = currentLink->m_next;
+
 			}
 
-			return index;
+			return -1;
 		}
 
 		// Returns true if the list contains the requested data, otherwise false
 		bool contains(T data) const
 		{
-			int location{ index(data) };
-			return location != -1;
+			return index(data) != -1;
 		}
 
 		// Returns an iterator to the beginning of the list
@@ -402,38 +377,38 @@ namespace JADT
 				List<T> right{ list.slice(midpoint, list.m_length) };
 				mergeSort(right, comparisonFcn);
 
-				int i{ 0 };
-				int j{ 0 };
-				int k{ 0 };
+				Link<T>* currentLeft{ left.m_head };
+				Link<T>* currentRight{ right.m_head };
+				Link<T>* currentLink{ list.m_head };
 
-				while (i < left.length() && j < right.length())
+				while (currentLeft && currentRight)
 				{
-					if (comparisonFcn(left[i], right[j]))
+					if (comparisonFcn(currentLeft->m_data, currentRight->m_data))
 					{
-						list[k] = left[i];
-						++i;
+						currentLink->m_data = currentLeft->m_data;
+						currentLeft = currentLeft->m_next;
 					}
 					else
 					{
-						list[k] = right[j];
-						++j;
+						currentLink->m_data = currentRight->m_data;
+						currentRight = currentRight->m_next;
 					}
 
-					++k;
+					currentLink = currentLink->m_next;
 				}
 
-				while (i < left.length())
+				while (currentLeft)
 				{
-					list[k] = left[i];
-					++i;
-					++k;
+					currentLink->m_data = currentLeft->m_data;
+					currentLeft = currentLeft->m_next;
+					currentLink = currentLink->m_next;
 				}
 
-				while (j < right.length())
+				while (currentRight)
 				{
-					list[k] = right[j];
-					++j;
-					++k;
+					currentLink->m_data = currentRight->m_data;
+					currentRight = currentRight->m_next;
+					currentLink = currentLink->m_next;
 				}
 
 			}

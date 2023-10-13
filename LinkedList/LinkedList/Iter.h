@@ -22,13 +22,16 @@ namespace JADT
 
 		void operator++()
 		{
-			if (m_iter->m_next)
+			if (m_iter)
 			{
-				m_iter = m_iter->m_next;
-			}
-			else
-			{
-				++m_iter;
+				if (m_iter->m_next)
+				{
+					m_iter = m_iter->m_next;
+				}
+				else
+				{
+					++m_iter;
+				}
 			}
 		}
 

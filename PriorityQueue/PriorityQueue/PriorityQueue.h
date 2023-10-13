@@ -19,7 +19,7 @@ namespace JADT
 	class PriorityQueue
 	{
 	private:
-		List<Pair<U>> m_queue{};
+		List<Pair<U>> m_queue{};  // This is a really inefficient way to do this. Would be better to use the binary tree approach. This works for now, though.
 		bool m_maxQueue{};
 
 	public:

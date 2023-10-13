@@ -74,11 +74,11 @@ namespace JADT
 			return m_connections;
 		}
 
-		bool adjacent(const Vertex<T, U>& vertex) const
+		bool adjacent(const Vertex<T, U>& vertex)
 		{
-			for (int index{0}; index < m_connections.length(); ++index)
+			for (Edge<T, U>& edge : m_connections)
 			{
-				if (m_connections[index].m_edge == vertex)
+				if (edge.m_edge == vertex)
 				{
 					return true;
 				}
@@ -93,14 +93,17 @@ namespace JADT
 		}
 
 	private:
-		int getEdgeIndex(Vertex<T, U>& vertex) const
+		int getEdgeIndex(Vertex<T, U>& vertex)
 		{
-			for (int index{ 0 }; index < m_connections.length(); ++index)
+			int index = { 0 };
+			for (Edge<T, U>& edge : m_connections)
 			{
-				if (m_connections[index].m_edge == vertex)
+				if (edge.m_edge == vertex)
 				{
 					return index;
 				}
+
+				++index;
 			}
 
 			throw std::invalid_argument("No edge to argued vertex");
