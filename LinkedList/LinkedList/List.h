@@ -3,6 +3,7 @@
 
 #include <initializer_list>
 #include <iostream>
+#include <exception>
 
 #include "Link.h"
 #include "Iter.h"
