@@ -1,7 +1,6 @@
+#if 1
 #include <iostream>
 
-#include "List.h"
-#include "Vertex.h"
 #include "Graph.h"
 
 int main()
@@ -17,3 +16,5 @@ int main()
 	graph.removeVertex(0);
 	std::cout << graph.size() << '\n';
 }
+
+#endif

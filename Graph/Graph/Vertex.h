@@ -1,5 +1,5 @@
-#ifndef VERTEX_H
-#define VERTEX_H
+#ifndef JADT_VERTEX_H
+#define JADT_VERTEX_H
 
 #include <stdexcept>
 
@@ -11,41 +11,15 @@ namespace JADT
 	template <typename T, typename U>
 	class Vertex
 	{
-	private:
-		T m_key{};
-		U m_value{};
-		List<Edge<T, U>> m_connections{};
-
-		// Copy constructor (prohibited)
-		Vertex(Vertex<T, U>& vertex)
-		{}
-
-		// Move constructor (prohibited)
-		Vertex(Vertex<T, U>&& vertex)
-		{}
-
-		// Copy assignment (prohibited)
-		Vertex<T, U>& operator=(Vertex<T, U>& vertex);
-
-		// Move assignment (prohibited)
-		Vertex<T, U>& operator=(Vertex<T, U>&& vertex);
-
 	public:
-		Vertex(T key)
-			: m_key{ key }
-		{}
-		
-		Vertex(T key, U value)
-			: m_key{ key }, m_value{ value }
-		{}
-
-		~Vertex() = default;
+		Vertex(T key);
+		Vertex(T key, U value);
 
 		friend bool operator==(const Vertex<T, U>& vert1, const Vertex<T, U>& vert2)
 		{
-			return (	vert1.m_key == vert2.m_key
-				&& vert1.m_value == vert2.m_value
-				&& vert1.m_connections == vert2.m_connections);
+			return (vert1.key == vert2.key
+				&& vert1.value == vert2.value
+				&& vert1.connections == vert2.connections);
 		}
 
 		friend bool operator!=(const Vertex<T, U>& vert1, const Vertex<T, U>& vert2)
@@ -53,62 +27,26 @@ namespace JADT
 			return !(operator==(vert1, vert2));
 		}
 
-		U getValue() const { return m_value; }
-
-		void setValue(U value) { m_value = value; }
-
-		T getKey() const { return m_key; }
-
-		void addEdge(Vertex<T, U>& vertex, int weight)
-		{
-			m_connections.append(Edge<T, U>{vertex, weight});
-		}
-
-		void removeEdge(Vertex<T, U>& vertex)
-		{
-			m_connections.remove(getEdgeIndex(vertex));
-		}
-
-		const List<Edge<T, U>>& getConnections() const
-		{
-			return m_connections;
-		}
-
-		bool adjacent(const Vertex<T, U>& vertex)
-		{
-			for (Edge<T, U>& edge : m_connections)
-			{
-				if (edge.m_edge == vertex)
-				{
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		int getEdgeWeight(const Vertex<T, U>& vertex) const
-		{
-			return m_connections[getEdgeIndex(vertex)].m_weight;
-		}
+		U getValue() const;
+		void setValue(U value);
+		T getKey() const;
+		void addEdge(Vertex<T, U>& vertex, int weight);
+		void removeEdge(Vertex<T, U>& vertex);
+		const List<Edge<T, U>>& getConnections() const;
+		bool adjacent(const Vertex<T, U>& vertex);
+		int getEdgeWeight(const Vertex<T, U>& vertex) const;
 
 	private:
-		int getEdgeIndex(Vertex<T, U>& vertex)
-		{
-			int index = { 0 };
-			for (Edge<T, U>& edge : m_connections)
-			{
-				if (edge.m_edge == vertex)
-				{
-					return index;
-				}
+		T key{};
+		U value{};
+		List<Edge<T, U>> connections{};
 
-				++index;
-			}
-
-			throw std::invalid_argument("No edge to argued vertex");
-		}
+		int getEdgeIndex(Vertex<T, U>& vertex);
+		Vertex(Vertex<T, U>& vertex);  // Copy constructor (prohibited)
+		Vertex(Vertex<T, U>&& vertex);  // Move constructor (prohibited)
+		Vertex<T, U>& operator=(Vertex<T, U>& vertex);  // Copy assignment (prohibited)
+		Vertex<T, U>& operator=(Vertex<T, U>&& vertex);  // Move assignment (prohibited)
 	};
 }
-
+#include "Vertex.hpp"
 #endif
