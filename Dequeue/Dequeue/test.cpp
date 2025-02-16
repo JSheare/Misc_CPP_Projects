@@ -1,3 +1,4 @@
+#if 1
 #include <iostream>
 
 #include "Dequeue.h"
@@ -22,3 +23,4 @@ int main()
         std::cout << "Popping from the rear: " << dequeue1.removeRear() << '\n';
     }
 }
+#endif
