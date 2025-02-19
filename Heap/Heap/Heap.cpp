@@ -1,4 +1,3 @@
-#if 1
 #include <iostream>
 
 #include "Heap.h"
@@ -6,7 +5,7 @@
 int main()
 {
     std::cout << "Min heap with starting capacity 2:" << '\n';
-    JADT::Heap<int, int> heap1{ 2 };
+    JADT::Heap<int, int> heap1{2};
     heap1.insert(5, 5);
     heap1.insert(17, 17);
     heap1.insert(3, 3);
@@ -34,4 +33,4 @@ int main()
         std::cout << heap2.extract() << '\n';
     }
 }
-#endif
+
