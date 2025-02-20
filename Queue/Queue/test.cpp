@@ -5,12 +5,21 @@
 
 int main()
 {
-    JADT::Queue<int> queue{ 1, 2, 3, 4, 5 };
-    queue.push(6);
-    while (!queue.isEmpty())
+    JADT::Queue<int> queue;
+    for (int i{ 0 }; i < 100; ++i)
     {
-        std::cout << "Popping from queue: " << queue.pop() << '\n';
+        std::cout << "Pushing: " << i << '\n';
+        queue.push(i);
     }
+
+    std::cout << '\n';
+
+    while (!queue.empty())
+    {
+        std::cout << "Popping: " << queue.front() << '\n';
+        queue.pop();
+    }
+
 	return 0;
 }
 #endif

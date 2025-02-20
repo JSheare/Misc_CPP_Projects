@@ -1,6 +1,7 @@
 #ifndef JADT_QUEUE_HPP
 #define JADT_QUEUE_HPP
 
+#include <cstddef>
 #include <initializer_list>
 #include <stdexcept>
 
@@ -20,35 +21,40 @@ namespace JADT
 	}
 
 	template <typename T>
-	void Queue<T>::push(T item)
+	std::size_t Queue<T>::size() const
 	{
-		queue.insert(0, item);
+		return deque.size();
 	}
 
 	template <typename T>
-	T Queue<T>::pop()
+	bool Queue<T>::empty() const
+	{
+		return deque.empty();
+	}
+
+	template <typename T>
+	void Queue<T>::push(const T& item)
+	{
+		deque.pushBack(item);
+	}
+
+	template <typename T>
+	T& Queue<T>::front() const
+	{
+		return deque.peekFront();
+	}
+
+	template <typename T>
+	void Queue<T>::pop()
 	{
 		try
 		{
-			return queue.pop();
+			return deque.popFront();
 		}
 		catch (std::out_of_range error)
 		{
-			throw std::out_of_range("Cannot pop an empty queue");
+			throw std::out_of_range("cannot pop an empty queue");
 		}
 	}
-
-	template <typename T>
-	bool Queue<T>::isEmpty() const
-	{
-		return queue.isEmpty();
-	}
-
-	template <typename T>
-	int Queue<T>::size() const
-	{
-		return queue.length();
-	}
 }
-
 #endif

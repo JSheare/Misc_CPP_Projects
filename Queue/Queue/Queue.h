@@ -1,10 +1,11 @@
 #ifndef JADT_QUEUE_H
 #define JADT_QUEUE_H
 
+#include <cstddef>
 #include <initializer_list>
 #include <stdexcept>
 
-#include "List.h"
+#include "Deque.h"
 
 namespace JADT
 {
@@ -14,13 +15,14 @@ namespace JADT
 	public:
 		Queue();
 		Queue(std::initializer_list<T> list);
-		void push(T data);
-		T pop();
-		bool isEmpty() const;
-		int size() const;
+		std::size_t size() const;
+		bool empty() const;
+		void push(const T& data);
+		T& front() const;
+		void pop();
 
 	private:
-		List<T> queue;
+		Deque<T> deque;
 	};
 }
 #include "Queue.hpp"
