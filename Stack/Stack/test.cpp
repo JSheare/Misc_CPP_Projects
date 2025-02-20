@@ -5,13 +5,21 @@
 
 int main()
 {
-    JADT::Stack<int> stack{ 1, 2, 3, 4, 5, 6 };
-
-    std::cout << "Peeking at stack: " << stack.peek() << '\n';
-
-    while (!stack.isEmpty())
+    JADT::Stack<int> stack;
+    for (int i{ 0 }; i < 100; ++i)
     {
-        std::cout << "Popping from stack: " << stack.pop() << '\n';
+        std::cout << "Pushing: " << i << '\n';
+        stack.push(i);
     }
+
+    std::cout << '\n';
+
+    while (!stack.empty())
+    {
+        std::cout << "Popping: " << stack.top() << '\n';
+        stack.pop();
+    }
+
+    return 0;
 }
 #endif

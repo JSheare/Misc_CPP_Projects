@@ -1,6 +1,7 @@
 #ifndef JADT_STACK_HPP
 #define JADT_STACK_HPP
 
+#include <cstddef>
 #include <initializer_list>
 #include <stdexcept>
 
@@ -20,45 +21,40 @@ namespace JADT
 	}
 
 	template <typename T>
-	void Stack<T>::push(T data)
+	std::size_t Stack<T>::size() const
 	{
-		stack.append(data);
+		return deque.size();
 	}
 
 	template <typename T>
-	T Stack<T>::pop()
+	bool Stack<T>::empty() const
+	{
+		return deque.empty();
+	}
+
+	template <typename T>
+	void Stack<T>::push(const T& item)
+	{
+		deque.pushBack(item);
+	}
+
+	template <typename T>
+	T& Stack<T>::top() const
+	{
+		return deque.peekBack();
+	}
+
+	template <typename T>
+	void Stack<T>::pop()
 	{
 		try
 		{
-			return stack.pop();
+			return deque.popBack();
 		}
 		catch (std::out_of_range error)
 		{
-			throw std::out_of_range("Cannot pop from an empty stack");
+			throw std::out_of_range("cannot pop from an empty stack");
 		}
-	}
-
-	template <typename T>
-	const T& Stack<T>::peek() const
-	{
-		if (isEmpty())
-		{
-			throw std::out_of_range("Cannot peek at an empty stack");
-		}
-
-		return stack[stack.length() - 1];
-	}
-
-	template <typename T>
-	int Stack<T>::size() const
-	{
-		return stack.length();
-	}
-
-	template <typename T>
-	bool Stack<T>::isEmpty() const
-	{
-		return stack.isEmpty();
 	}
 }
 #endif

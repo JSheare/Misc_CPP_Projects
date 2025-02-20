@@ -1,30 +1,28 @@
 #ifndef JADT_STACK_H
 #define JADT_STACK_H
 
+#include <cstddef>
 #include <initializer_list>
 #include <stdexcept>
 
-#include "List.h"
+#include "Deque.h"
 
 namespace JADT
 {
 	template <typename T>
 	class Stack
 	{
-	private:
-		List<T> m_stack{};
-
 	public:
 		Stack();
 		Stack(std::initializer_list<T> list);
-		void push(T data);
-		T pop();
-		const T& peek() const;
-		int size() const;
-		bool isEmpty() const;
+		std::size_t size() const;
+		bool empty() const;
+		void push(const T& item);
+		T& top() const;
+		void pop();
 
 	private:
-		List<T> stack;
+		Deque<T> deque;
 	};
 }
 #include "Stack.hpp"
