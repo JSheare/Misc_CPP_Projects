@@ -20,10 +20,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Dequeue.h">
+    <ClInclude Include="Deque.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Dequeue.hpp">
+    <ClInclude Include="Deque.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
