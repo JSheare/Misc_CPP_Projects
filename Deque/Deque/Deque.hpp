@@ -11,7 +11,7 @@ namespace JADT
 	Deque<T>::Deque()
 	{
 		mapSize = 8;
-		map = new T * [mapSize];
+		map = new T*[mapSize];
 		for (std::size_t i{ 0 }; i < mapSize; ++i)
 		{
 			map[i] = nullptr;
@@ -121,7 +121,7 @@ namespace JADT
 	void Deque<T>::resize(bool resizeFront)
 	{
 		std::size_t newMapSize{ mapSize * 2 };
-		T** newMap{ new T* [newMapSize] };
+		T** newMap{ new T*[newMapSize] };
 		if (resizeFront)
 		{
 			std::size_t divider{ newMapSize - mapSize };
