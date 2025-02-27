@@ -5,10 +5,6 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "Link.h"
-#include "Iter.h"
-#include "CIter.h"
-
 namespace JADT
 {
 	template <typename T>
@@ -114,7 +110,7 @@ namespace JADT
 	std::ostream& operator<<(std::ostream& out, const List<T1>& list)
 	{
 		out << '[';
-		Link<T1>* currentLink{ list.m_head };
+		typename List<T1>::ListLink* currentLink{ list.m_head };
 		int index{ 0 };
 		while (currentLink)
 		{
@@ -155,21 +151,21 @@ namespace JADT
 		}
 		else if (index == 0 && m_length == 0)  // Appending to an empty list
 		{
-			m_head = new Link<T>(data);
+			m_head = new ListLink(data);
 			m_tail = m_head;
 		}
 		else if (index >= m_length) // Appending to the end of the list
 		{
-			Link<T>* newLink{ new Link<T>(data) };
+			ListLink* newLink{ new ListLink(data) };
 			newLink->m_prev = m_tail;
 			m_tail->m_next = newLink;
 			m_tail = newLink;
 		}
 		else  // Appending inside of the list
 		{
-			Link<T>* existingLink{ getLink(index) };
-			Link<T>* previousLink{ existingLink->m_prev };
-			Link<T>* newLink{ new Link<T>(data) };
+			ListLink* existingLink{ getLink(index) };
+			ListLink* previousLink{ existingLink->m_prev };
+			ListLink* newLink{ new ListLink(data) };
 
 			if (previousLink)  // In case the insertion point is the beginning of the list
 				previousLink->m_next = newLink;
@@ -197,11 +193,11 @@ namespace JADT
 		if (index <= 0 && m_length == 0)
 			throw std::out_of_range("Cannot pop an empty list");
 
-		Link<T>* reqLink(getLink(index));
+		ListLink* reqLink(getLink(index));
 		T data = reqLink->m_data;
 
-		Link<T>* previousLink{ reqLink->m_prev };
-		Link<T>* nextLink{ reqLink->m_next };
+		ListLink* previousLink{ reqLink->m_prev };
+		ListLink* nextLink{ reqLink->m_next };
 
 		if (!previousLink && !nextLink)  // For popping from a list with only a single link
 		{
@@ -237,7 +233,7 @@ namespace JADT
 	List<T> List<T>::slice(int start, int stop) const
 	{
 		List<T> slice{};
-		Link<T>* currentLink{ getLink(start) };
+		ListLink* currentLink{ getLink(start) };
 		int index{ start };
 		while (index < stop)
 		{
@@ -266,7 +262,7 @@ namespace JADT
 	template <typename T>
 	int List<T>::index(T data) const
 	{
-		Link<T>* currentLink{ this->m_head };
+		ListLink* currentLink{ this->m_head };
 		int index{ 0 };
 		while (currentLink)
 		{
@@ -290,32 +286,32 @@ namespace JADT
 
 	// Returns an iterator to the beginning of the list
 	template <typename T>
-	Iter<T> List<T>::begin()
+	List<T>::ListIter List<T>::begin()
 	{
-		return Iter<T>{m_head};
+		return ListIter{m_head};
 	}
 
 	// Returns an iterator to one past the end of the list
 	template <typename T>
-	Iter<T> List<T>::end()
+	List<T>::ListIter List<T>::end()
 	{
-		Iter<T> temp{ m_tail };
+		ListIter temp{ m_tail };
 		++temp;
 		return temp;
 	}
 
 	// Returns a constant iterator to the beginning of the list
 	template <typename T>
-	CIter<T> List<T>::cbegin() const
+	List<T>::ConstListIter List<T>::cbegin() const
 	{
-		return CIter<T>{m_head};
+		return ConstListIter{m_head};
 	}
 
 	// Returns a constant iterator to one past the end of the list
 	template <typename T>
-	CIter<T> List<T>::cend() const
+	List<T>::ConstListIter List<T>::cend() const
 	{
-		CIter<T> temp{ m_tail };
+		ConstListIter temp{ m_tail };
 		++temp;
 		return temp;
 	}
@@ -330,7 +326,7 @@ namespace JADT
 		}
 		else if (m_length > 1)
 		{
-			Link<T>* currentLink{ m_head->m_next };
+			ListLink* currentLink{ m_head->m_next };
 			while (true)
 			{
 				delete currentLink->m_prev;
@@ -349,7 +345,7 @@ namespace JADT
 
 	// Returns a pointer to the link corresponding to the requested index
 	template <typename T>
-	Link<T>* List<T>::getLink(int index) const
+	List<T>::ListLink* List<T>::getLink(int index) const
 	{
 		if (index >= m_length || index < 0)
 		{
@@ -360,7 +356,7 @@ namespace JADT
 		if (index < (m_length / 2))
 		{
 			int currentIndex{ 0 };
-			Link<T>* currentLink{ m_head };
+			ListLink* currentLink{ m_head };
 			while (currentIndex < index)
 			{
 				currentLink = currentLink->m_next;
@@ -373,7 +369,7 @@ namespace JADT
 		else
 		{
 			int currentIndex{ m_length - 1 };
-			Link<T>* currentLink{ m_tail };
+			ListLink* currentLink{ m_tail };
 			while (currentIndex > index)
 			{
 				currentLink = currentLink->m_prev;
@@ -398,9 +394,9 @@ namespace JADT
 			List<T> right{ list.slice(midpoint, list.m_length) };
 			mergeSort(right, comparisonFcn);
 
-			Link<T>* currentLeft{ left.m_head };
-			Link<T>* currentRight{ right.m_head };
-			Link<T>* currentLink{ list.m_head };
+			ListLink* currentLeft{ left.m_head };
+			ListLink* currentRight{ right.m_head };
+			ListLink* currentLink{ list.m_head };
 
 			while (currentLeft && currentRight)
 			{
@@ -444,5 +440,66 @@ namespace JADT
 	{
 		return x <= y;
 	}
+
+	// List link implementation
+
+	template <typename T>
+	List<T>::ListLink::ListLink()
+	{}
+
+	template <typename T>
+	List<T>::ListLink::ListLink(T& data) :
+		m_data{ data }
+	{}
+
+	// List iterator implementation
+
+	template <typename T>
+	List<T>::ListIter::ListIter(List<T>::ListLink* nodePtr) :
+		m_nodePtr{nodePtr}
+	{}
+
+	template <typename T>
+	T& List<T>::ListIter::operator*()
+	{
+		return m_nodePtr->m_data;
+	}
+
+	template <typename T>
+	void List<T>::ListIter::operator++()
+	{
+		if (m_nodePtr)
+		{
+			if (m_nodePtr->m_next)
+			{
+				m_nodePtr = m_nodePtr->m_next;
+			}
+			else
+			{
+				++m_nodePtr;
+			}
+		}
+	}
+
+	template <typename T>
+	bool List<T>::ListIter::operator!=(const ListIter& iter) const
+	{
+		return m_nodePtr != iter.m_nodePtr;
+	}
+
+	// Constant list iterator implementation
+
+	template <typename T>
+	List<T>::ConstListIter::ConstListIter(ListLink* nodePtr) :
+		ListIter(nodePtr)
+	{}
+
+	template <typename T>
+	const T& List<T>::ConstListIter::operator*()
+	{
+		return ListIter::operator*();
+	}
+
+
 }
 #endif

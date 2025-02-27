@@ -20,16 +20,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Link.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="List.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Iter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CIter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="List.hpp">

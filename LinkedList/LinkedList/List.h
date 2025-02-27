@@ -5,15 +5,16 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "Link.h"
-#include "Iter.h"
-#include "CIter.h"
-
 namespace JADT
 {
 	template <typename T>
 	class List
 	{
+	private:
+		class ListLink;
+		class ListIter;
+		class ConstListIter;
+
 	public:
 		List();
 		List(std::initializer_list<T> list);
@@ -39,20 +40,48 @@ namespace JADT
 		template <typename U> void sort(bool(*comparisonFcn)(U, U));  // Custom comparison function
 		int index(T data) const;
 		bool contains(T data) const;
-		Iter<T> begin();
-		Iter<T> end();
-		CIter<T> cbegin() const;
-		CIter<T> cend() const;
+		ListIter begin();
+		ListIter end();
+		ConstListIter cbegin() const;
+		ConstListIter cend() const;
 
 	private:
 		int m_length{ 0 };
-		Link<T>* m_head{ nullptr };
-		Link<T>* m_tail{ nullptr };
+		ListLink* m_head{ nullptr };
+		ListLink* m_tail{ nullptr };
 
 		void deallocate();
-		Link<T>* getLink(int index) const;
+		ListLink* getLink(int index) const;
 		template <typename U> static List<T>& mergeSort(List<T>& list, bool (*comparisonFcn)(U, U));
 		static bool ascendingComparison(T& x, T& y);
+
+		class ListLink
+		{
+		public:
+			T m_data{};
+			ListLink* m_next{ nullptr };
+			ListLink* m_prev{ nullptr };
+
+			ListLink();
+			ListLink(T& data);
+		};
+
+		class ListIter
+		{
+		public:
+			ListIter(ListLink* nodePtr);
+			T& operator*();
+			void operator++();
+			bool operator!=(const ListIter& iterator) const;
+		protected:
+			ListLink* m_nodePtr;
+		};
+
+		class ConstListIter : public ListIter
+		{
+			ConstListIter(ListLink* nodePtr);
+			const T& operator*();
+		};
 	};
 }
 #include "List.hpp"

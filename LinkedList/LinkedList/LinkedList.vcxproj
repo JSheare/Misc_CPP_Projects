@@ -132,9 +132,6 @@
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CIter.h" />
-    <ClInclude Include="Iter.h" />
-    <ClInclude Include="Link.h" />
     <ClInclude Include="List.h" />
     <ClInclude Include="List.hpp" />
   </ItemGroup>
