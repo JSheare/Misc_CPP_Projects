@@ -17,8 +17,10 @@ namespace JADT
 		bool empty() const;
 		void pushFront(const T& item);
 		void pushBack(const T& item);
-		T& peekFront() const;
-		T& peekBack() const;
+		T& peekFront();
+		const T& peekFront() const;
+		T& peekBack();
+		const T& peekBack() const;
 		void popFront();
 		void popBack();
 

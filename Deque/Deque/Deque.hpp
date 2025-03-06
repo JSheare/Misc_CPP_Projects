@@ -74,7 +74,7 @@ namespace JADT
 	}
 
 	template <typename T>
-	T& Deque<T>::peekFront() const
+	T& Deque<T>::peekFront()
 	{
 		if (numItems == 0)
 			throw std::out_of_range("no items to peek");
@@ -86,7 +86,31 @@ namespace JADT
 	}
 
 	template <typename T>
-	T& Deque<T>::peekBack() const
+	const T& Deque<T>::peekFront() const
+	{
+		if (numItems == 0)
+			throw std::out_of_range("no items to peek");
+
+		if (startIndex == BLOCKSIZE - 1)
+			return map[frontBlock + 1][0];
+		else
+			return map[frontBlock][startIndex + 1];
+	}
+
+	template <typename T>
+	T& Deque<T>::peekBack()
+	{
+		if (numItems == 0)
+			throw std::out_of_range("no items to peek");
+
+		if (endIndex == 0)
+			return map[backBlock - 1][BLOCKSIZE - 1];
+		else
+			return map[backBlock][endIndex - 1];
+	}
+
+	template <typename T>
+	const T& Deque<T>::peekBack() const
 	{
 		if (numItems == 0)
 			throw std::out_of_range("no items to peek");
