@@ -5,33 +5,35 @@
 
 int main()
 {
-    std::cout << "Min heap with starting capacity 2:" << '\n';
-    JADT::Heap<int, int> heap1{ 2 };
-    heap1.insert(5, 5);
-    heap1.insert(17, 17);
-    heap1.insert(3, 3);
-    heap1.insert(0, 0);
-    heap1.insert(6, 6);
+    std::cout << "Max heap with starting capacity 2:" << '\n';
+    JADT::Heap<int> minHeap{ 2 };
+    minHeap.insert(5);
+    minHeap.insert(17);
+    minHeap.insert(3);
+    minHeap.insert(0);
+    minHeap.insert(6);
 
-    std::cout << "Popping from min heap\n";
-    while (!heap1.isEmpty())
+    std::cout << "Popping from max heap\n";
+    while (!minHeap.empty())
     {
-        std::cout << heap1.extract() << '\n';
+        std::cout << minHeap.top() << '\n';
+        minHeap.pop();
     }
 
     std::cout << '\n';
-    std::cout << "Max heap:" << '\n';
-    JADT::Heap<int, int> heap2{ true };
-    heap2.insert(5, 5);
-    heap2.insert(17, 17);
-    heap2.insert(3, 3);
-    heap2.insert(0, 0);
-    heap2.insert(6, 6);
+    std::cout << "Min heap:" << '\n';
+    JADT::Heap<int, [](const int& x, const int& y) {return x < y; } > maxHeap;
+    maxHeap.insert(5);
+    maxHeap.insert(17);
+    maxHeap.insert(3);
+    maxHeap.insert(0);
+    maxHeap.insert(6);
 
-    std::cout << "Popping from max heap\n";
-    while (!heap2.isEmpty())
+    std::cout << "Popping from min heap\n";
+    while (!maxHeap.empty())
     {
-        std::cout << heap2.extract() << '\n';
+        std::cout << maxHeap.top() << '\n';
+        maxHeap.pop();
     }
 }
 #endif

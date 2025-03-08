@@ -1,34 +1,38 @@
 #ifndef JADT_HEAP_H
 #define JADT_HEAP_H
 
+#include <cstddef>
+
 namespace JADT
 {
-	template <typename T, typename U>
+	template <typename T>
+	bool heapGreater(const T& x, const T& y);
+
+	template <typename T, bool (*comparator)(const T&, const T&) = heapGreater>
 	class Heap
 	{
 	public:
-		Heap(bool isMax = false, int capacity = 10);
-		Heap(int capacity);
+		Heap(std::size_t capacity = 10);
 		~Heap();
-		void minHeapify(int index);
-		void maxHeapify(int index);
-		void insert(T key, U value);
-		U top();
-		U extract();
-		bool isEmpty();
-		int size();
+		std::size_t size() const;
+		bool empty() const;
+		void insert(const T& item);
+		T& top();
+		const T& top() const;
+		void pop();
 
 	private:
-		T* keyArray{ nullptr };
-		U* valueArray{ nullptr };
-		int heapSize{ 0 };
-		int capacity{};
-		bool isMax{};
+		std::size_t heapSize{ 0 };
+		std::size_t capacity;
+		T* items;
 
-		int getParent(int index);
-		int getLeft(int index);
-		int getRight(int index);
-		void swap(int index1, int index2);
+		std::size_t getParent(std::size_t index) const;
+		std::size_t getLeft(std::size_t index) const;
+		std::size_t getRight(std::size_t index) const;
+		void heapifyUp(std::size_t index);
+		void heapifyDown(std::size_t index);
+		void swap(std::size_t index1, std::size_t index2);
+		void resize();
 	};
 }
 #include "Heap.hpp"

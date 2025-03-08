@@ -1,210 +1,161 @@
 #ifndef JADT_HEAP_HPP
 #define JADT_HEAP_HPP
 
-#include <algorithm>
+#include <cstddef>
 #include <stdexcept>
 
 namespace JADT
 {
-	template <typename T, typename U>
-	Heap<T, U>::Heap(bool isMax, int capacity)
-		: capacity{ capacity }
-		, isMax{ isMax }
+	template <typename T>
+	bool heapGreater(const T& x, const T& y)
 	{
-		keyArray = new T[capacity];
-		valueArray = new U[capacity];
+		return x > y;
 	}
 
-	template <typename T, typename U>
-	Heap<T, U>::Heap(int capacity)
-		: Heap(false, capacity)
+	template <typename T, bool (*comparator)(const T&, const T&)>
+	Heap<T, comparator>::Heap(std::size_t capacity) :
+		capacity{capacity}, items{new T[capacity]}
 	{}
 
-	template <typename T, typename U>
-	Heap<T, U>::~Heap()
+	template <typename T, bool (*comparator)(const T&, const T&)>
+	Heap<T, comparator>::~Heap()
 	{
-		delete keyArray;
-		delete valueArray;
+		delete[] items;
 	}
 
-	// Restores heap property such that the smallest key is at the top of the heap
-	template <typename T, typename U>
-	void Heap<T, U>::minHeapify(int index)
+	template <typename T, bool (*comparator)(const T&, const T&)>
+	std::size_t Heap<T, comparator>::size() const
+	{
+		return heapSize;
+	}
+
+	template <typename T, bool (*comparator)(const T&, const T&)>
+	bool Heap<T, comparator>::empty() const
+	{
+		return heapSize == 0;
+	}
+
+	template <typename T, bool (*comparator)(const T&, const T&)>
+	void Heap<T, comparator>::insert(const T& item)
+	{
+		if (heapSize == capacity)
+			resize();
+		
+		items[heapSize] = item;
+		heapifyUp(heapSize++);
+	}
+
+	template <typename T, bool (*comparator)(const T&, const T&)>
+	T& Heap<T, comparator>::top()
+	{
+		if (heapSize == 0)
+			throw std::range_error("Cannot return the top of an empty heap");
+
+		return items[0];
+	}
+
+	template <typename T, bool (*comparator)(const T&, const T&)>
+	const T& Heap<T, comparator>::top() const
+	{
+		if (heapSize == 0)
+			throw std::range_error("Cannot return the top of an empty heap");
+
+		return items[0];
+	}
+
+	template <typename T, bool (*comparator)(const T&, const T&)>
+	void Heap<T, comparator>::pop()
+	{
+		if (heapSize == 0)
+			throw std::range_error("Cannot pop an empty heap");
+
+		if (heapSize == 1)
+			--heapSize;
+		else
+		{
+			items[0] = items[heapSize - 1];
+			--heapSize;
+			heapifyDown(0);
+		}
+	}
+
+	template <typename T, bool (*comparator)(const T&, const T&)>
+	std::size_t Heap<T, comparator>::getParent(std::size_t index) const
+	{
+		return (index - 1) / 2;
+	}
+
+	template <typename T, bool (*comparator)(const T&, const T&)>
+	std::size_t Heap<T, comparator>::getLeft(std::size_t index) const
+	{
+		return 2 * index + 1;
+	}
+
+	template <typename T, bool (*comparator)(const T&, const T&)>
+	std::size_t Heap<T, comparator>::getRight(std::size_t index) const
+	{
+		return 2 * index + 2;
+	}
+
+	template <typename T, bool (*comparator)(const T&, const T&)>
+	void Heap<T, comparator>::heapifyUp(std::size_t index)
+	{
+		while (index > 0)
+		{
+			std::size_t parentIndex{ getParent(index) };
+			if (comparator(items[index], items[parentIndex]))
+			{
+				swap(index, parentIndex);
+				index = parentIndex;
+			}
+			else
+				break;
+		}
+	}
+
+	template <typename T, bool (*comparator)(const T&, const T&)>
+	void Heap<T, comparator>::heapifyDown(std::size_t index)
 	{
 		while (true)
 		{
-			int left{ getLeft(index) };
-			int right{ getRight(index) };
+			std::size_t leftIndex{ getLeft(index) };
+			std::size_t rightIndex{ getRight(index) };
+			std::size_t smallest{ index };
+			if (leftIndex < heapSize && comparator(items[leftIndex], items[index]))
+				smallest = leftIndex;
 
-			int smallest{ index };
-			if (left < heapSize && keyArray[left] < keyArray[index])
-			{
-				smallest = left;
-			}
-			if (right < heapSize && keyArray[right] < keyArray[smallest])
-			{
-				smallest = right;
-			}
+			if (rightIndex < heapSize && comparator(items[rightIndex], items[smallest]))
+				smallest = rightIndex;
+
 			if (smallest != index)
 			{
 				swap(index, smallest);
 				index = smallest;
 				continue;
 			}
-
 			break;
 		}
 	}
 
-	// Restores heap property such that the largest key is at the top of the heap
-	template <typename T, typename U>
-	void Heap<T, U>::maxHeapify(int index)
+	template <typename T, bool (*comparator)(const T&, const T&)>
+	void Heap<T, comparator>::swap(std::size_t index1, std::size_t index2)
 	{
-		while (true)
+		T temp{ items[index1] };
+		items[index1] = items[index2];
+		items[index2] = temp;
+	}
+
+	template <typename T, bool (*comparator)(const T&, const T&)>
+	void Heap<T, comparator>::resize()
+	{
+		capacity *= 2;
+		T* newItems{ new T[capacity] };
+		for (std::size_t i{ 0 }; i < heapSize; ++i)
 		{
-			int left{ getLeft(index) };
-			int right{ getRight(index) };
-
-			int largest{ index };
-			if (left < heapSize && keyArray[left] > keyArray[index])
-			{
-				largest = left;
-			}
-			if (right < heapSize && keyArray[right] > keyArray[largest])
-			{
-				largest = right;
-			}
-			if (largest != index)
-			{
-				swap(index, largest);
-				index = largest;
-				continue;
-			}
-
-			break;
+			newItems[i] = items[i];
 		}
-	}
-
-	// Inserts a new key/value pair onto the heap
-	template <typename T, typename U>
-	void Heap<T, U>::insert(T key, U value)
-	{
-		// Doubles the capacity of the heap if we try and insert while the heap is at capacity
-		if (heapSize == capacity)
-		{
-			T* tempKeys{ new T[2 * capacity] };
-			U* tempVals{ new U[2 * capacity] };
-			for (int i{ 0 }; i < capacity; ++i)
-			{
-				tempKeys[i] = keyArray[i];
-				tempVals[i] = valueArray[i];
-			}
-
-			delete keyArray;
-			delete valueArray;
-			keyArray = tempKeys;
-			valueArray = tempVals;
-			capacity = 2 * capacity;
-		}
-
-		int i = heapSize;
-		keyArray[heapSize] = key;
-		valueArray[heapSize++] = value;
-
-		if (isMax)
-		{
-			while (i != 0 and keyArray[getParent(i)] < keyArray[i])
-			{
-				swap(i, getParent(i));
-				i = getParent(i);
-			}
-		}
-		else
-		{
-			while (i != 0 and keyArray[getParent(i)] > keyArray[i])
-			{
-				swap(i, getParent(i));
-				i = getParent(i);
-			}
-		}
-	}
-
-	// Returns the top element on the heap without removing it
-	template <typename T, typename U>
-	U Heap<T, U>::top()
-	{
-		return valueArray[0];
-	}
-
-	// Returns the top element on the heap and removes it
-	template <typename T, typename U>
-	U Heap<T, U>::extract()
-	{
-		if (heapSize <= 0)
-		{
-			throw std::out_of_range("Cannot extract from an empty heap");
-		}
-		if (heapSize == 1)
-		{
-			--heapSize;
-			return valueArray[0];
-		}
-
-		U root = valueArray[0];
-		keyArray[0] = keyArray[heapSize - 1];
-		valueArray[0] = valueArray[heapSize - 1];
-		--heapSize;
-		if (isMax)
-		{
-			maxHeapify(0);
-		}
-		else
-		{
-			minHeapify(0);
-		}
-		return root;
-	}
-
-	template <typename T, typename U>
-	bool Heap<T, U>::isEmpty()
-	{
-		return !heapSize;
-	}
-
-	template <typename T, typename U>
-	int Heap<T, U>::size()
-	{
-		return heapSize;
-	}
-
-	template <typename T, typename U>
-	int Heap<T, U>::getParent(int index)
-	{
-		return (index - 1) / 2;
-	}
-
-	template <typename T, typename U>
-	int Heap<T, U>::getLeft(int index)
-	{
-		return (2 * index) + 1;
-	}
-
-	template <typename T, typename U>
-	int Heap<T, U>::getRight(int index)
-	{
-		return (2 * index) + 2;
-	}
-
-	template <typename T, typename U>
-	void Heap<T, U>::swap(int index1, int index2)
-	{
-		T temp1{ keyArray[index1] };
-		U temp2{ valueArray[index1] };
-		keyArray[index1] = keyArray[index2];
-		keyArray[index2] = temp1;
-
-		valueArray[index1] = valueArray[index2];
-		valueArray[index2] = temp2;
+		delete[] items;
+		items = newItems;
 	}
 }
 #endif
