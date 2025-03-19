@@ -425,16 +425,16 @@ namespace JADT
 
 	// Returns a constant iterator to the beginning of the list
 	template <typename T>
-	List<T>::ConstListIter List<T>::cbegin() const
+	const List<T>::ListIter List<T>::cbegin() const
 	{
-		return ConstListIter{head};
+		return ListIter{head};
 	}
 
 	// Returns a constant iterator to one past the end of the list
 	template <typename T>
-	List<T>::ConstListIter List<T>::cend() const
+	const List<T>::ListIter List<T>::cend() const
 	{
-		ConstListIter temp{ tail };
+		ListIter temp{ tail };
 		++temp;
 		return temp;
 	}
@@ -550,6 +550,12 @@ namespace JADT
 	}
 
 	template <typename T>
+	const T& List<T>::ListIter::operator*() const
+	{
+		return nodePtr->data;
+	}
+
+	template <typename T>
 	void List<T>::ListIter::operator++()
 	{
 		if (nodePtr)
@@ -565,19 +571,6 @@ namespace JADT
 	bool List<T>::ListIter::operator!=(const ListIter& iter) const
 	{
 		return nodePtr != iter.nodePtr;
-	}
-
-	// Constant list iterator implementation
-
-	template <typename T>
-	List<T>::ConstListIter::ConstListIter(ListLink* nodePtr) :
-		ListIter(nodePtr)
-	{}
-
-	template <typename T>
-	const T& List<T>::ConstListIter::operator*()
-	{
-		return ListIter::operator*();
 	}
 }
 #endif

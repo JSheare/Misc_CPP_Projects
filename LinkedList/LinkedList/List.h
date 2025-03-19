@@ -14,7 +14,6 @@ namespace JADT
 	private:
 		class ListLink;
 		class ListIter;
-		class ConstListIter;
 
 	public:
 		List();
@@ -51,8 +50,8 @@ namespace JADT
 		template <typename U> void sort(bool(*comparisonFcn)(U, U)=ascendingComparison);  // Custom comparison function
 		ListIter begin();
 		ListIter end();
-		ConstListIter cbegin() const;
-		ConstListIter cend() const;
+		const ListIter cbegin() const;
+		const ListIter cend() const;
 
 	private:
 		std::size_t length{ 0 };
@@ -78,16 +77,11 @@ namespace JADT
 		public:
 			ListIter(ListLink* nodePtr);
 			T& operator*();
+			const T& operator*() const;
 			void operator++();
 			bool operator!=(const ListIter& iterator) const;
-		protected:
+		private:
 			ListLink* nodePtr;
-		};
-
-		class ConstListIter : public ListIter
-		{
-			ConstListIter(ListLink* nodePtr);
-			const T& operator*();
 		};
 	};
 }
