@@ -79,12 +79,13 @@ namespace JADT
 			ListIter(ListLink* nodePtr);
 			T& operator*();
 			void operator++();
+			bool operator==(const ListIter& iterator) const;
 			bool operator!=(const ListIter& iterator) const;
 		protected:
 			ListLink* nodePtr;
 		};
 
-		class ConstListIter : ListIter
+		class ConstListIter : public ListIter
 		{
 		public:
 			ConstListIter(ListLink* nodePtr);

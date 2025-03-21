@@ -562,23 +562,28 @@ namespace JADT
 	}
 
 	template <typename T>
-	bool List<T>::ListIter::operator!=(const ListIter& iter) const
+	bool List<T>::ListIter::operator==(const ListIter& iterator) const
 	{
-		return nodePtr != iter.nodePtr;
+		return nodePtr != iterator.nodePtr;
+	}
+
+	template <typename T>
+	bool List<T>::ListIter::operator!=(const ListIter& iterator) const
+	{
+		return !operator==(iterator);
 	}
 
 	// Constant list iterator implementation
 
 	template <typename T>
-	List<T>::ConstListIter::ConstListIter(List<T>::ListLink* nodePtr)
-	{
-		this->nodePtr = nodePtr;
-	}
+	List<T>::ConstListIter::ConstListIter(List<T>::ListLink* nodePtr) :
+		ListIter::nodePtr{nodePtr}
+	{}
 
 	template <typename T>
 	const T& List<T>::ConstListIter::operator*() const
 	{
-		return this->nodePtr->data;
+		return ListIter::nodePtr->data;
 	}
 }
 #endif
