@@ -564,7 +564,7 @@ namespace JADT
 	template <typename T>
 	bool List<T>::ListIter::operator==(const ListIter& iterator) const
 	{
-		return nodePtr != iterator.nodePtr;
+		return nodePtr == iterator.nodePtr;
 	}
 
 	template <typename T>
