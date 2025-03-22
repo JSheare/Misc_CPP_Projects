@@ -296,7 +296,7 @@ namespace JADT
 	// Hash table iterator implementation
 
 	template <typename T, typename U>
-	HashTable<T, U>::HTIter::HTIter(HashTable<T, U>::BucketLink** bucketHead, HashTable<T, U>::BucketLink* currentLink, std::size_t bucketsLeft) :
+	HashTable<T, U>::HTIter::HTIter(BucketLink** bucketHead, BucketLink* currentLink, std::size_t bucketsLeft) :
 		bucketHead{bucketHead}, currentLink{currentLink}, bucketsLeft{bucketsLeft}
 	{}
 
@@ -345,7 +345,7 @@ namespace JADT
 	// Constant hash table iterator implementation
 
 	template <typename T, typename U>
-	HashTable<T, U>::ConstHTIter::ConstHTIter(HashTable<T, U>::BucketLink** bucketHead, HashTable<T, U>::BucketLink* currentLink, std::size_t bucketsLeft) :
+	HashTable<T, U>::ConstHTIter::ConstHTIter(BucketLink** bucketHead, BucketLink* currentLink, std::size_t bucketsLeft) :
 		HTIter(bucketHead, currentLink, bucketsLeft)
 	{}
 
