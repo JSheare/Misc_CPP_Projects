@@ -28,21 +28,21 @@ namespace JADT
 	template <typename T, typename U>
 	bool HashTable<T, U>::empty() const
 	{
-		return numValues == 0;
+		return numPairs == 0;
 	}
 
 	// Returns the size of the hash table
 	template <typename T, typename U>
 	std::size_t HashTable<T, U>::size() const
 	{
-		return numValues;
+		return numPairs;
 	}
 
 	// Returns true if the hash table contains a key-value pair with the given key
 	template <typename T, typename U>
 	bool HashTable<T, U>::contains(const T& key)
 	{
-		std::size_t index{ getBucketIndex(key) };
+		std::size_t index{ bucket(key) };
 		if (buckets[index])
 		{
 			BucketLink* curr{ buckets[index] };
@@ -64,15 +64,15 @@ namespace JADT
 		getBucketLink(key)->value = value;
 	}
 
-	// Returns the value for the given key. Note that calling this method may invalidate iterators
+	// Returns the value for the given key. Note that calling this method may cause a rehash which would invalidate iterators
 	template <typename T, typename U>
-	U& HashTable<T, U>::get(const T& key)
+	U& HashTable<T, U>::find(const T& key)
 	{
 		return getBucketLink(key)->value;
 	}
 
 	template <typename T, typename U>
-	const U& HashTable<T, U>::get(const T& key) const
+	const U& HashTable<T, U>::find(const T& key) const
 	{
 		return getBucketLink(key)->value;
 	}
@@ -81,20 +81,20 @@ namespace JADT
 	template <typename T, typename U>
 	U& HashTable<T, U>::operator[](const T& key)
 	{
-		return get(key);
+		return find(key);
 	}
 
 	template <typename T, typename U>
 	const U& HashTable<T, U>::operator[](const T& key) const
 	{
-		return get(key);
+		return find(key);
 	}
 
 	// Removes the key-value pair with the given key from the hash table (if it exists)
 	template <typename T, typename U>
 	void HashTable<T, U>::remove(const T& key)
 	{
-		std::size_t index{ getBucketIndex(key) };
+		std::size_t index{ bucket(key) };
 		if (buckets[index])
 		{
 			BucketLink* prev{ nullptr };
@@ -111,7 +111,7 @@ namespace JADT
 						buckets[index] = curr->next;
 
 					delete curr;
-					--numValues;
+					--numPairs;
 					return;
 				}
 				prev = curr;
@@ -139,7 +139,111 @@ namespace JADT
 				buckets[i] = nullptr;
 			}
 		}
-		numValues = 0;
+		numPairs = 0;
+	}
+
+	// Hashes the given key and returns the corresponding bucket index
+	template <typename T, typename U>
+	std::size_t HashTable<T, U>::bucket(const T& key) const
+	{
+		std::size_t hash{ hasher(key) };
+		return hash % numBuckets;
+	}
+
+	// Returns the number of key-value pairs in the bucket with the given index
+	template <typename T, typename U>
+	std::size_t HashTable<T, U>::bucketSize(std::size_t bucketIndex) const
+	{
+		if (bucketIndex < numBuckets && buckets[bucketIndex])
+		{
+			std::size_t numPairs{ 0 };
+			BucketLink* curr{ buckets[bucketIndex] };
+			while (curr)
+			{
+				++numPairs;
+				curr = curr->next;
+			}
+			return numPairs;
+		}
+		return 0;
+	}
+
+	// Returns the current load factor (the number of key-value pairs divided by the number of buckets)
+	template <typename T, typename U>
+	float HashTable<T, U>::loadFactor() const
+	{
+		return static_cast<float>(numPairs) / static_cast<float>(numBuckets);
+	}
+
+	// Returns the current maximum load factor
+	template <typename T, typename U>
+	float HashTable<T, U>::maxLoadFactor() const
+	{
+		return maxLoad;
+	}
+
+	// Sets the current maximum load factor
+	template <typename T, typename U>
+	void HashTable<T, U>::maxLoadFactor(float max)
+	{
+		maxLoad = max;
+	}
+
+	// Reserves the number of buckets needed to store at least count key-value pairs (without exceeding the maximum load factor) and rehashes
+	template<typename T, typename U>
+	void HashTable<T, U>::reserve(std::size_t count)
+	{
+		// Rehashing to the ceiling of this division operation
+		float bucketsReq{ static_cast<float>(count) / maxLoadFactor() };
+		std::size_t bucketsReqI{ static_cast<std::size_t>(bucketsReq) };
+		if (bucketsReq == static_cast<float>(bucketsReqI))
+			rehash(bucketsReqI);
+		else
+			rehash(bucketsReqI + 1);
+	}
+
+	// Rehashes the table so that it's under the maximum load factor and has at least count buckets
+	template <typename T, typename U>
+	void HashTable<T, U>::rehash(std::size_t count)
+	{
+		std::size_t oldNumBuckets{ numBuckets };
+		BucketLink** oldBuckets{ buckets };
+		while (loadFactor() > maxLoadFactor() || numBuckets < count)
+		{
+			numBuckets *= 2;
+		}
+		buckets = new BucketLink * [numBuckets];
+		for (std::size_t i{ 0 }; i < numBuckets; ++i)
+		{
+			buckets[i] = nullptr;
+		}
+		for (std::size_t i{ 0 }; i < oldNumBuckets; ++i)
+		{
+			if (oldBuckets[i])
+			{
+				BucketLink* curr{ oldBuckets[i] };
+				BucketLink* next{ nullptr };
+				while (curr)
+				{
+					next = curr->next;
+					curr->next = nullptr;
+					std::size_t index{ bucket(curr->key) };
+					if (!buckets[index])
+						buckets[index] = curr;
+					else
+					{
+						BucketLink* curr1{ buckets[index] };
+						while (curr1->next)
+						{
+							curr1 = curr1->next;
+						}
+						curr1->next = curr;
+					}
+					curr = next;
+				}
+			}
+		}
+		delete[] oldBuckets;
 	}
 
 	// Returns an iterator to the beginning of the hash table. Iterators return references to keys
@@ -180,111 +284,61 @@ namespace JADT
 		return ConstHTIter(buckets + numBuckets, nullptr, 0);
 	}
 
-	// Hashes the given key and returns the corresponding bucket index
-	template <typename T, typename U>
-	std::size_t HashTable<T, U>::getBucketIndex(const T& key) const
-	{
-		std::size_t hash{ hasher(key) };
-		return hash % numBuckets;
-	}
-
 	// Returns the link with the given key. Creates a new link if no link with the given key exists
 	template <typename T, typename U>
 	HashTable<T, U>::BucketLink* HashTable<T, U>::getBucketLink(const T& key)
 	{
-		// Rehashing if we've exceeded the maximum load factor
-		if (static_cast<double>(numValues) / static_cast<double>(numBuckets) >= 1.0)
-			rehash();
-
-		std::size_t index{ getBucketIndex(key) };
+		std::size_t index{ bucket(key) };
+		BucketLink* curr{ nullptr };
 		if (buckets[index])
 		{
 			BucketLink* prev{ nullptr };
-			BucketLink* curr{ buckets[index] };
+			curr = buckets[index];
 			while (curr)
 			{
 				// Getting an existing key value pair
 				if (curr->key == key)
 					return curr;
-				
+
 				prev = curr;
 				curr = curr->next;
 			}
 			// Adding a new pair to a non-empty bucket
 			curr = new BucketLink();
-			curr->key = key;
 			prev->next = curr;
-			++numValues;
-			return curr;
 		}
-		// Adding a new pair to an empty bucket
-		BucketLink* link{ new BucketLink() };
-		link->key = key;
-		buckets[index] = link;
-		++numValues;
-		return link;
+		else
+		{
+			// Adding a new pair to an empty bucket
+			curr = new BucketLink();
+			buckets[index] = curr;
+		}
+
+		curr->key = key;
+		++numPairs;
+		if (loadFactor() >= maxLoadFactor())
+			rehash();
+
+		return curr;
 	}
 
 	// Returns the link with the given key. Throws std::invalid_argument if no link with the specified key exists
 	template <typename T, typename U>
 	HashTable<T, U>::BucketLink* HashTable<T, U>::getBucketLink(const T& key) const
 	{
-		std::size_t index{ getBucketIndex(key) };
+		std::size_t index{ bucket(key) };
 		if (buckets[index])
 		{
-			BucketLink* prev{ nullptr };
 			BucketLink* curr{ buckets[index] };
 			while (curr)
 			{
 				if (curr->key == key)
 					return curr;
 
-				prev = curr;
 				curr = curr->next;
 			}
 		}
 		throw std::invalid_argument("Not a valid key");
-	}
-
-	// Rehashes the hash table to be 2x its current size
-	template <typename T, typename U>
-	void HashTable<T, U>::rehash()
-	{
-		std::size_t oldNumBuckets{ numBuckets };
-		BucketLink** oldBuckets{ buckets };
-		numBuckets *= 2;
-		buckets = new BucketLink*[numBuckets];
-		for (std::size_t i{ 0 }; i < numBuckets; ++i)
-		{
-			buckets[i] = nullptr;
-		}
-		for (std::size_t i{ 0 }; i < oldNumBuckets; ++i)
-		{
-			if (oldBuckets[i])
-			{
-				BucketLink* curr{ oldBuckets[i] };
-				BucketLink* next{ nullptr };
-				while (curr)
-				{
-					next = curr->next;
-					curr->next = nullptr;
-					std::size_t index{ getBucketIndex(curr->key) };
-					if (!buckets[index])
-						buckets[index] = curr;
-					else
-					{
-						BucketLink* curr1{ buckets[index] };
-						while (curr1->next)
-						{
-							curr1 = curr1->next;
-						}
-						curr1->next = curr;
-					}
-					curr = next;
-				}
-			}
-		}
-		delete[] oldBuckets;
 	}
 
 	// Bucket link implementation

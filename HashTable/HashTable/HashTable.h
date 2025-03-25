@@ -21,12 +21,19 @@ namespace JADT
 		std::size_t size() const;
 		bool contains(const T& key);
 		void insert(const T& key, const U& value);
-		U& get(const T& key);
-		const U& get(const T& key) const;
+		U& find(const T& key);
+		const U& find(const T& key) const;
 		U& operator[](const T& key);
 		const U& operator[](const T& key) const;
 		void remove(const T& key);
 		void clear();
+		std::size_t bucket(const T& key) const;
+		std::size_t bucketSize(std::size_t bucketIndex) const;
+		float loadFactor() const;
+		float maxLoadFactor() const;
+		void maxLoadFactor(float max);
+		void reserve(std::size_t count);
+		void rehash(std::size_t count = 0);
 		HTIter begin();
 		HTIter end();
 		ConstHTIter cbegin();
@@ -35,13 +42,12 @@ namespace JADT
 	private:
 		BucketLink** buckets;
 		std::size_t numBuckets;
-		std::size_t numValues{ 0 };
+		std::size_t numPairs{ 0 };
+		float maxLoad{ 1.0 };
 		std::hash<T> hasher;
 
-		std::size_t getBucketIndex(const T& key) const;
 		BucketLink* getBucketLink(const T& key);
 		BucketLink* getBucketLink(const T& key) const;
-		void rehash();
 
 		class BucketLink
 		{
