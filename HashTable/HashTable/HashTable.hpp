@@ -40,7 +40,7 @@ namespace JADT
 
 	// Returns true if the hash table contains a key-value pair with the given key
 	template <typename T, typename U>
-	bool HashTable<T, U>::contains(const T& key)
+	bool HashTable<T, U>::contains(const T& key) const
 	{
 		std::size_t index{ bucket(key) };
 		if (buckets[index])
@@ -267,19 +267,19 @@ namespace JADT
 
 	// Returns a constant iterator to the beginning of the hash table. Constant iterators return constant references to keys
 	template <typename T, typename U>
-	HashTable<T, U>::ConstHTIter HashTable<T, U>::cbegin()
+	HashTable<T, U>::ConstHTIter HashTable<T, U>::begin() const
 	{
 		for (std::size_t i{ 0 }; i < numBuckets; ++i)
 		{
 			if (buckets[i])
 				return ConstHTIter(buckets + i, buckets[i], numBuckets - i);
 		}
-		return cend();
+		return end();
 	}
 
 	// Returns a constant iterator to one past the end of the hash table
 	template <typename T, typename U>
-	HashTable<T, U>::ConstHTIter HashTable<T, U>::cend()
+	HashTable<T, U>::ConstHTIter HashTable<T, U>::end() const
 	{
 		return ConstHTIter(buckets + numBuckets, nullptr, 0);
 	}
@@ -404,7 +404,7 @@ namespace JADT
 	{}
 
 	template <typename T, typename U>
-	const T& HashTable<T, U>::ConstHTIter::operator*() const
+	const T& HashTable<T, U>::ConstHTIter::operator*()
 	{
 		return HTIter::currentLink->key;
 	}

@@ -19,7 +19,7 @@ namespace JADT
 		~HashTable();
 		bool empty() const;
 		std::size_t size() const;
-		bool contains(const T& key);
+		bool contains(const T& key) const;
 		void insert(const T& key, const U& value);
 		U& find(const T& key);
 		const U& find(const T& key) const;
@@ -36,8 +36,8 @@ namespace JADT
 		void rehash(std::size_t count = 0);
 		HTIter begin();
 		HTIter end();
-		ConstHTIter cbegin();
-		ConstHTIter cend();
+		ConstHTIter begin() const;
+		ConstHTIter end() const;
 		
 	private:
 		BucketLink** buckets;
@@ -76,8 +76,9 @@ namespace JADT
 
 		class ConstHTIter : public HTIter
 		{
+		public:
 			ConstHTIter(BucketLink** bucketHead, BucketLink* currentLink, std::size_t bucketsLeft);
-			const T& operator*() const;
+			const T& operator*();
 		};
 	};
 }
