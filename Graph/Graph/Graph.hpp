@@ -1,273 +1,189 @@
 #ifndef JADT_GRAPH_HPP
 #define JADT_GRAPH_HPP
 
+#include <cstddef>
 #include <stdexcept>
 
-#include "List.h"
-#include "Edge.h"
-#include "Vertex.h"
+#include "HashTable.h"
 
 namespace JADT
 {
 	template <typename T, typename U>
 	Graph<T, U>::Graph()
-		: numVerts{ 0 }
 	{}
-
-	// Move constructor
-	template <typename T, typename U>
-	Graph<T, U>::Graph(Graph<T, U>&& graph) noexcept
-		: vertList{ graph.vertList }
-		, vertKeys{ graph.vertKeys }
-		, numVerts{ graph.numVerts }
-	{
-		graph.numVerts = 0;
-	}
 
 	template <typename T, typename U>
 	Graph<T, U>::~Graph()
 	{
-		for (int index{ 0 }; index < numVerts; ++index)
-		{
-			delete vertList[index];
-		}
+		clear();
 	}
 
-	// Move assignment
+	// Returns true if there aren't any vertices in the graph
 	template <typename T, typename U>
-	Graph<T, U>& Graph<T, U>::operator=(Graph<T, U>&& graph)
+	bool Graph<T, U>::empty() const
 	{
-		vertList = graph.vertList;
-		vertKeys = graph.vertKeys;
-		numVerts = graph.numVerts;
-
-		graph.numVerts = 0;
-	}
-
-	template <typename T, typename U>
-	U Graph<T, U>::operator[](T key) const
-	{
-		return getVertexValue(key);
-	}
-
-	// Adds a vertex with the given key to the graph
-	template <typename T, typename U>
-	void Graph<T, U>::addVertex(T key)
-	{
-		if (!contains(key))
-		{
-			Vertex<T, U>* vertPtr = new Vertex<T, U>(key);
-			vertList.append(vertPtr);
-			vertKeys.append(key);
-			++numVerts;
-		}
-	}
-
-	// Adds a vertex with the given key and value to the graph
-	template <typename T, typename U>
-	void Graph<T, U>::addVertex(T key, U value)
-	{
-		if (!contains(key))
-		{
-			Vertex<T, U>* vertPtr = new Vertex<T, U>(key, value);
-			vertList.append(vertPtr);
-			vertKeys.append(key);
-			++numVerts;
-		}
-	}
-
-	// Returns the value stored in the vertex with the given key
-	template <typename T, typename U>
-	U Graph<T, U>::getVertexValue(T key) const
-	{
-		return getVertex(key).getValue();
-	}
-
-	// Sets the value of the vertex with the given key
-	template <typename T, typename U>
-	void Graph<T, U>::setVertexValue(T key, U value)
-	{
-		if (!contains(key))
-		{
-			addVertex(key, value);
-		}
-		else
-		{
-			getVertex(key).setValue(value);
-		}
-	}
-
-	// Removes the vertex with the given key from the graph
-	template <typename T, typename U>
-	void Graph<T, U>::removeVertex(T key)
-	{
-		if (contains(key))
-		{
-			Vertex<T, U>& targetVert{ getVertex(key) };
-			for (T& vertKey : vertKeys)  // Removes any edges to the vertex we're removing
-			{
-				if (key == vertKey)
-				{
-					continue;
-				}
-
-				Vertex<T, U>& tempVert{ getVertex(vertKey) };
-				if (tempVert.adjacent(targetVert))
-				{
-					tempVert.removeEdge(targetVert);
-				}
-			}
-
-			int index{ vertKeys.index(key) };
-			vertKeys.remove(index);
-			delete vertList[index];
-			vertList.remove(index);
-			--numVerts;
-		}
-	}
-
-	// Adds an edge from vertex1 (with key1) to vertex2 (with key2)
-	template <typename T, typename U>
-	void Graph<T, U>::addEdge(T key1, T key2, int weight)
-	{
-		Vertex<T, U>& vertex1{ getVertex(key1) };
-		Vertex<T, U>& vertex2{ getVertex(key2) };
-
-		if (!vertex1.adjacent(vertex2)) // Disallows multiple edges to the same node (i.e. no multigraphs)
-		{
-			vertex1.addEdge(vertex2, weight);
-		}
-	}
-
-	// Adds an edge from vertex1 (with key1) to vertex2 (with key2) and vice versa
-	template <typename T, typename U>
-	void Graph<T, U>::addDoubleEdge(T key1, T key2, int weight1, int weight2)
-	{
-		Vertex<T, U>& vertex1{ getVertex(key1) };
-		Vertex<T, U>& vertex2{ getVertex(key2) };
-
-		if (!vertex1.adjacent(vertex2))
-		{
-			vertex1.addEdge(vertex2, weight1);
-		}
-
-		if (!vertex2.adjacent(vertex1))
-		{
-			vertex2.addEdge(vertex1, weight2);
-		}
-	}
-
-	// Returns the weight of the edge connecting vertex1 (with key1) and vertex2 (with key2)
-	template <typename T, typename U>
-	int Graph<T, U>::getEdgeWeight(T key1, T key2)
-	{
-		return getVertex(key1).getEdgeWeight(getVertex(key2));
-	}
-
-	// Removes an edge (if it exists) from vertex1 (with key1) to vertex2 (with key2)
-	template <typename T, typename U>
-	void Graph<T, U>::removeEdge(T key1, T key2)
-	{
-		if (contains(key1) && contains(key2))
-		{
-			Vertex<T, U>& vertex1{ getVertex(key1) };
-			Vertex<T, U>& vertex2{ getVertex(key2) };
-
-			if (vertex1.adjacent(vertex2))
-			{
-				vertex1.removeEdge(vertex2);
-			}
-		}
-	}
-
-	// Removes a double edge(if it exists) from vertex1 (with key1) to vertex2 (with key2) and vice versa
-	template <typename T, typename U>
-	void Graph<T, U>::removeDoubleEdge(T key1, T key2)
-	{
-		if (contains(key1) && contains(key2))
-		{
-			Vertex<T, U>& vertex1{ getVertex(key1) };
-			Vertex<T, U>& vertex2{ getVertex(key2) };
-
-			if (vertex1.adjacent(vertex2))
-			{
-				vertex1.removeEdge(vertex2);
-			}
-
-			if (vertex2.adjacent(vertex1))
-			{
-				vertex2.removeEdge(vertex1);
-			}
-		}
-	}
-
-	// Returns a list of vertex keys
-	template <typename T, typename U>
-	const List<T>& Graph<T, U>::getVertices() const
-	{
-		return vertKeys;
-	}
-
-	// Returns true if a vertex with the given key is in the graph
-	template <typename T, typename U>
-	bool Graph<T, U>::contains(T key) const
-	{
-		return vertKeys.contains(key);
+		return numVerts == 0;
 	}
 
 	// Returns the number of vertices in the graph
 	template <typename T, typename U>
-	int Graph<T, U>::size() const { return numVerts; }
-
-	// Returns true if vertex1 (with key1) has an edge pointing to vertex2 (with key2)
-	template <typename T, typename U>
-	bool Graph<T, U>::adjacent(T key1, T key2) const
+	std::size_t Graph<T, U>::size() const
 	{
-		return getVertex(key1).adjacent(getVertex(key2));
+		return numVerts;
 	}
 
-	// Returns a list of vertices that vertex1 (with key1) has edges pointing towards
+	// Returns true if the graph contains a vertex with the given key
 	template <typename T, typename U>
-	List<T> Graph<T, U>::neighbors(T key) const
+	bool Graph<T, U>::contains(const T& key) const
 	{
-		List<T> adjKeys{};
-		const Vertex<T, U>& vert{ getVertex(key) };
-		for (int index{ 0 }; index < vert.getConnections().length(); ++index)
+		return vertTable.contains(key);
+	}
+
+	// Adds a vertex with the given key and value to the graph
+	template <typename T, typename U>
+	void Graph<T, U>::addVertex(const T& key, const U& value)
+	{
+		Vertex* newVertex{ new Vertex(value) };
+		vertTable[key] = newVertex;
+		++numVerts;
+	}
+
+	// Returns the value of the vertex with the given key. Throws std::invalid_argument if no vertex with the given key exists
+	template <typename T, typename U>
+	U& Graph<T, U>::getVertex(const T& key)
+	{
+		if (vertTable.contains(key))
+			return vertTable[key]->value;
+
+		throw std::invalid_argument("Not a valid vertex key");
+	}
+
+	template <typename T, typename U>
+	const U& Graph<T, U>::getVertex(const T& key) const
+	{
+		if (vertTable.contains(key))
+			return vertTable[key]->value;
+
+		throw std::invalid_argument("Not a valid vertex key");
+	}
+
+	template <typename T, typename U>
+	U& Graph<T, U>::operator[](const T& key)
+	{
+		return getVertex(key);
+	}
+
+	template <typename T, typename U>
+	const U& Graph<T, U>::operator[](const T& key) const
+	{
+		return getVertex(key);
+	}
+
+	// Removes the vertex with the given key from the graph
+	template <typename T, typename U>
+	void Graph<T, U>::removeVertex(const T& key)
+	{
+		if (vertTable.contains(key))
 		{
-			adjKeys.append(vert.getConnections()[index].edge.getKey());
+			// Removing the vertex itself
+			delete vertTable[key];
+			vertTable.remove(key);
+			--numVerts;
+			// Finding and removing all edges to the vertex
+			for (T& vertKey : vertTable)
+			{
+				for (T& adjacentKey : vertTable[vertKey]->edges)
+				{
+					if (adjacentKey == key)
+					{
+						vertTable[vertKey]->edges.remove(key);
+						break;
+					}
+				}
+			}
 		}
-
-		return adjKeys;
 	}
 
-	// Returns a reference to the vertex with the given key
+	// Returns true if there's an edge from the vertex with key1 to the vertex with key2. Throws std::invalid_argument if no vertex exists for one or both of the keys
 	template <typename T, typename U>
-	Vertex<T, U>& Graph<T, U>::getVertex(T key)
+	bool Graph<T, U>::adjacent(const T& key1, const T& key2) const
 	{
-		int index{ vertKeys.index(key) };
-		if (index == -1)
+		if (vertTable.contains(key1) && vertTable.contains(key2))
 		{
-			throw std::invalid_argument("Graph has no vertex with the given key");
+			return vertTable[key1]->edges.contains(key2);
+		}
+		throw std::invalid_argument("One or both of the given keys are not valid");
+	}
+
+	// Returns a constant reference to the outgoing edge table of the vertex with the given key. The table is full of key-weight pairs
+	template <typename T, typename U>
+	const HashTable<T, int>& Graph<T, U>::getAdjacent(const T& key) const
+	{
+		if (vertTable.contains(key))
+			return vertTable[key]->edges;
+
+		throw std::invalid_argument("Not a valid vertex key");
+	}
+
+	// Returns the weight of the outgoing edge from the vertex with key1 to the vertex with key2. Throws std::invalid_argument if no vertex exists for one or both of the keys
+	// or if no outgoing edge from vertex1 to vertex2 exists
+	template <typename T, typename U>
+	int Graph<T, U>::getWeight(const T& key1, const T& key2) const
+	{
+		if (vertTable.contains(key1) && vertTable.contains(key2))
+		{
+			if (vertTable[key1]->edges.contains(key2))
+				return vertTable[key1]->edges[key2];
+
+			else
+				throw std::invalid_argument("No edge from key1 vertex to key2 vertex");
 		}
 		else
-		{
-			return *(vertList[index]);
-		}
+			throw std::invalid_argument("One or both of the given keys are not valid");
 	}
 
-	// Returns a constant reference to the vertex with the given key
+	// Adds an outgoing edge from the vertex with key1 to the vertex with key2, or updates the weight of the existing edge. Throws std::invalid_argument if no vertex
+	// exists for one or both of the keys
 	template <typename T, typename U>
-	const Vertex<T, U>& Graph<T, U>::getVertex(T key) const
+	void Graph<T, U>::addEdge(const T& key1, const T& key2, int weight)
 	{
-		int index{ vertKeys.index(key) };
-		if (index == -1)
+		if (vertTable.contains(key1) && vertTable.contains(key2))
 		{
-			throw std::invalid_argument("Graph has no vertex with the given key");
+			vertTable[key1]->edges[key2] = weight;
 		}
 		else
-		{
-			return *(vertList[index]);
-		}
+			throw std::invalid_argument("One or both of the given keys are not valid");
 	}
+
+	// Removes the outgoing edge between the vertex with key1 and the vertex with key2
+	template <typename T, typename U>
+	void Graph<T, U>::removeEdge(const T& key1, const T& key2)
+	{
+		if (vertTable.contains(key1) && vertTable.contains(key2))
+		{
+			vertTable[key1]->edges.remove(key2);
+		}
+		else
+			throw std::invalid_argument("One or both of the given keys are not valid");
+	}
+
+	// Clears all vertices and edges from the graph
+	template <typename T, typename U>
+	void Graph<T, U>::clear()
+	{
+		for (auto& key : vertTable)
+		{
+			delete vertTable[key];
+		}
+		vertTable.clear();
+		numVerts = 0;
+	}
+
+	// Vertex class implementation
+
+	template <typename T, typename U>
+	Graph<T, U>::Vertex::Vertex(const U& value) :
+		value{ value }
+	{}
 }
 #endif
