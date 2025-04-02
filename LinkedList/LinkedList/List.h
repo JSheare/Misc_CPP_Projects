@@ -23,7 +23,7 @@ namespace JADT
 		List(List<T>&& list) noexcept;  // Move constructor
 		~List();
 		List<T>& operator=(const List<T>& list);  // Copy assignment
-		List<T>& operator=(List<T>&& list);  // Move assignment
+		List<T>& operator=(List<T>&& list) noexcept;  // Move assignment
 		T& operator[](std::size_t index);
 		const T& operator[](std::size_t index) const;
 		friend bool operator==(const List<T>& list1, const List<T>& list2);

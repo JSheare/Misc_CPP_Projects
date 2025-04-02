@@ -72,7 +72,7 @@ namespace JADT
 
 	// Move assignment
 	template <typename T>
-	List<T>& List<T>::operator=(List<T>&& list)
+	List<T>& List<T>::operator=(List<T>&& list) noexcept
 	{
 		clear();
 
