@@ -22,7 +22,7 @@ namespace JADT
 		List(const List<T>& list);  // Copy constructor
 		List(List<T>&& list) noexcept;  // Move constructor
 		~List();
-		List<T>& operator=(List<T>& list);  // Copy assignment
+		List<T>& operator=(const List<T>& list);  // Copy assignment
 		List<T>& operator=(List<T>&& list);  // Move assignment
 		T& operator[](std::size_t index);
 		const T& operator[](std::size_t index) const;
@@ -66,7 +66,7 @@ namespace JADT
 		class ListLink
 		{
 		public:
-			T data;
+			T data{};
 			ListLink* next{ nullptr };
 			ListLink* prev{ nullptr };
 

@@ -29,7 +29,7 @@ namespace JADT
 		ListLink* currentLink{ list.head };
 		while (currentLink)
 		{
-			T data = currentLink->data;
+			T& data = currentLink->data;
 			pushBack(data);
 			currentLink = currentLink->next;
 		}
@@ -55,7 +55,7 @@ namespace JADT
 
 	// Copy assignment
 	template <typename T>
-	List<T>& List<T>::operator=(List<T>& list)
+	List<T>& List<T>::operator=(const List<T>& list)
 	{
 		if (&list == this)
 			return *this;
@@ -65,7 +65,7 @@ namespace JADT
 		ListLink* currentLink{ list.head };
 		while (currentLink)
 		{
-			T data = currentLink->data;
+			T& data = currentLink->data;
 			pushBack(data);
 			currentLink = currentLink->next;
 		}
@@ -318,22 +318,21 @@ namespace JADT
 	template <typename T>
 	void List<T>::clear()
 	{
-		if (length == 1)
-			delete head;
-
-		else if (length > 1)
+		if (length > 1)
 		{
-			ListLink* currentLink{ head->next };
-			while (true)
+			ListLink* prevLink{ nullptr };
+			ListLink* currentLink{ head };
+			while (currentLink)
 			{
-				delete currentLink->prev;
-				if (currentLink == tail)
-					break;
-
+				delete prevLink;
+				prevLink = currentLink;
 				currentLink = currentLink->next;
 			}
 			delete tail;
 		}
+		else
+			delete head;
+
 		head = nullptr;
 		tail = nullptr;
 		length = 0;
@@ -360,15 +359,15 @@ namespace JADT
 	template <typename T>
 	bool List<T>::contains(const T& item) const
 	{
-		try
+		ListLink* currentLink{ head };
+		while (currentLink)
 		{
-			index(item);
-			return true;
+			if (currentLink->data == item)
+				return true;
+			
+			currentLink = currentLink->next;
 		}
-		catch (const std::invalid_argument&)
-		{
-			return false;
-		}
+		return false;
 	}
 
 	// Returns a slice of the list containing only entries from start to one before stop
