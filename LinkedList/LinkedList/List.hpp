@@ -29,8 +29,7 @@ namespace JADT
 		ListLink* currentLink{ list.head };
 		while (currentLink)
 		{
-			T& data = currentLink->data;
-			pushBack(data);
+			pushBack(currentLink->data);
 			currentLink = currentLink->next;
 		}
 	}
@@ -65,8 +64,7 @@ namespace JADT
 		ListLink* currentLink{ list.head };
 		while (currentLink)
 		{
-			T& data = currentLink->data;
-			pushBack(data);
+			pushBack(currentLink->data);
 			currentLink = currentLink->next;
 		}
 		return *this;
