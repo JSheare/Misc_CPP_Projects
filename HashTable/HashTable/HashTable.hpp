@@ -9,7 +9,7 @@ namespace JADT
 {
 	template <typename T, typename U>
 	HashTable<T, U>::HashTable(std::size_t numBuckets) :
-		numBuckets{ numBuckets }, buckets{ new BucketLink*[numBuckets] }
+		buckets{ new BucketLink*[numBuckets] }, numBuckets{ numBuckets }
 	{
 		for (std::size_t i{ 0 }; i < numBuckets; ++i)
 		{
@@ -17,11 +17,132 @@ namespace JADT
 		}
 	}
 
+	// Copy constructor
+	template <typename T, typename U>
+	HashTable<T, U>::HashTable(const HashTable<T, U>& table) :
+		buckets{ new BucketLink*[table.numBuckets] }, numBuckets{table.numBuckets}, numPairs{table.numPairs}, maxLoad{table.maxLoad}
+	{
+		for (std::size_t i{ 0 }; i < numBuckets; ++i)
+		{
+			if (table.buckets[i])
+			{
+				if (table.buckets[i]->next)
+				{
+					BucketLink* curr{ table.buckets[i] };
+					BucketLink* copyCurr{ new BucketLink() };
+					buckets[i] = copyCurr;
+					copyCurr->key = curr->key;
+					copyCurr->value = curr->value;
+					curr = curr->next;
+					while (curr)
+					{
+						copyCurr->next = new BucketLink();
+						copyCurr = copyCurr->next;
+						copyCurr->key = curr->key;
+						copyCurr->value = curr->value;
+						curr = curr->next;
+					}
+				}
+				else
+				{
+					buckets[i] = new BucketLink();
+					buckets[i]->key = table.buckets[i]->key;
+					buckets[i]->value = table.buckets[i]->value;
+				}
+			}
+		}
+	}
+
+	// Move constructor
+	template <typename T, typename U>
+	HashTable<T, U>::HashTable(HashTable<T, U>&& table) noexcept :
+		buckets{ table.buckets }, numBuckets{table.numBuckets}, numPairs{table.numPairs}, maxLoad{table.maxLoad}
+	{
+		// Allocating exactly one bucket in the old table so that it's still valid after the move
+		table.numBuckets = 1;
+		table.buckets = new BucketLink*[1];
+		table.numPairs = 0;
+	}
+
 	template <typename T, typename U>
 	HashTable<T, U>::~HashTable()
 	{
 		clear();
 		delete[] buckets;
+	}
+
+	// Copy assignment
+	template <typename T, typename U>
+	HashTable<T, U>& HashTable<T, U>::operator=(const HashTable<T, U>& table)
+	{
+		if (&table == this)
+			return *this;
+
+		clear();
+		delete[] buckets;
+
+		numBuckets = table.numBuckets;
+		buckets = new BucketLink*[table.numBuckets];
+		numPairs = table.numPairs;
+		maxLoad = table.maxLoad;
+		for (std::size_t i{ 0 }; i < numBuckets; ++i)
+		{
+			if (table.buckets[i])
+			{
+				if (table.buckets[i]->next)
+				{
+					BucketLink* curr{ table.buckets[i] };
+					BucketLink* copyCurr{ new BucketLink() };
+					buckets[i] = copyCurr;
+					copyCurr->key = curr->key;
+					copyCurr->value = curr->value;
+					curr = curr->next;
+					while (curr)
+					{
+						copyCurr->next = new BucketLink();
+						copyCurr = copyCurr->next;
+						copyCurr->key = curr->key;
+						copyCurr->value = curr->value;
+						curr = curr->next;
+					}
+				}
+				else
+				{
+					buckets[i] = new BucketLink();
+					buckets[i]->key = table.buckets[i]->key;
+					buckets[i]->value = table.buckets[i]->value;
+				}
+			}
+		}
+	}
+
+	// Move assignment
+	template <typename T, typename U>
+	HashTable<T, U>& HashTable<T, U>::operator=(HashTable<T, U>&& table) noexcept
+	{
+		clear();
+		delete[] buckets;
+		numBuckets = table.numBuckets;
+		buckets = table.buckets;
+		numPairs = table.numPairs;
+		maxLoad = table.maxLoad;
+
+		// Allocating exactly one bucket in the old table so that it's still valid after the move
+		table.numBuckets = 1;
+		table.buckets = new BucketLink*[1];
+		table.numPairs = 0;
+	}
+
+	template <typename T, typename U>
+	U& HashTable<T, U>::operator[](const T& key)
+	{
+		return find(key);
+	}
+
+	template <typename T, typename U>
+	const U& HashTable<T, U>::operator[](const T& key) const
+	{
+		return find(key);
 	}
 
 	// Returns true if the hash table is empty
@@ -77,19 +198,6 @@ namespace JADT
 		return getBucketLink(key)->value;
 	}
 
-	// Synonym of get()
-	template <typename T, typename U>
-	U& HashTable<T, U>::operator[](const T& key)
-	{
-		return find(key);
-	}
-
-	template <typename T, typename U>
-	const U& HashTable<T, U>::operator[](const T& key) const
-	{
-		return find(key);
-	}
-
 	// Removes the key-value pair with the given key from the hash table (if it exists)
 	template <typename T, typename U>
 	void HashTable<T, U>::remove(const T& key)
@@ -140,6 +248,13 @@ namespace JADT
 			}
 		}
 		numPairs = 0;
+	}
+
+	// Returns the current number of buckets in the table
+	template <typename T, typename U>
+	std::size_t HashTable<T, U>::bucketCount() const
+	{
+		return numBuckets;
 	}
 
 	// Hashes the given key and returns the corresponding bucket index
@@ -207,7 +322,7 @@ namespace JADT
 	void HashTable<T, U>::rehash(std::size_t count)
 	{
 		std::size_t oldNumBuckets{ numBuckets };
-		BucketLink** oldBuckets{ buckets };
+		BucketLink** oldBuckets{ buckets };		
 		while (loadFactor() > maxLoadFactor() || numBuckets < count)
 		{
 			numBuckets *= 2;

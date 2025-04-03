@@ -16,32 +16,37 @@ namespace JADT
 
 	public:
 		HashTable(std::size_t numBuckets = 10);
+		HashTable(const HashTable<T, U>& table);  // Copy constructor
+		HashTable(HashTable<T, U>&& table) noexcept;  // Move constructor
 		~HashTable();
+		HashTable<T, U>& operator=(const HashTable<T, U>& table);  // Copy assignment
+		HashTable<T, U>& operator=(HashTable<T, U>&& table) noexcept;  // Move assignment
+		U& operator[](const T& key);
+		const U& operator[](const T& key) const;
 		bool empty() const;
 		std::size_t size() const;
 		bool contains(const T& key) const;
 		void insert(const T& key, const U& value);
 		U& find(const T& key);
 		const U& find(const T& key) const;
-		U& operator[](const T& key);
-		const U& operator[](const T& key) const;
 		void remove(const T& key);
 		void clear();
+		std::size_t bucketCount() const;
 		std::size_t bucket(const T& key) const;
 		std::size_t bucketSize(std::size_t bucketIndex) const;
 		float loadFactor() const;
 		float maxLoadFactor() const;
 		void maxLoadFactor(float max);
 		void reserve(std::size_t count);
-		void rehash(std::size_t count = 0);
+		void rehash(std::size_t count = 1);
 		HTIter begin();
 		HTIter end();
 		ConstHTIter begin() const;
 		ConstHTIter end() const;
 		
 	private:
-		BucketLink** buckets;
-		std::size_t numBuckets;
+		BucketLink** buckets{};
+		std::size_t numBuckets{};
 		std::size_t numPairs{ 0 };
 		float maxLoad{ 1.0 };
 		std::hash<T> hasher;
