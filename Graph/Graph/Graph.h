@@ -38,12 +38,12 @@ namespace JADT
 
 	private:
 		std::size_t numVerts{ 0 };
-		HashTable<T, Vertex*> vertTable;
+		HashTable<T, Vertex*> vertTable{};
 
 		class Vertex
 		{
 		public:
-			U value;
+			U value{};
 			HashTable<T, int> edges{ 1 };
 
 			Vertex(const U& value);
