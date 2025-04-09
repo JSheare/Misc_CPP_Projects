@@ -14,6 +14,17 @@ bool compareEdge(const EdgePair& pair1, const EdgePair& pair2)
 	return pair1.weight < pair2.weight;
 }
 
+JADT::Graph<char, int> makeGraph()
+{
+	JADT::Graph<char, int> test;
+	for (int i{ 0 }; i < 26; ++i)
+	{
+		char key{ static_cast<char>('a' + i) };
+		test.addVertex(key, i);
+	}
+	return test;
+}
+
 
 int main()
 {
@@ -57,5 +68,6 @@ int main()
 			pq.insert(EdgePair(key, adjacent[key]));
 		}
 	}
+	std::cout << '\n';
 	return 0;
 }

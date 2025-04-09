@@ -12,10 +12,77 @@ namespace JADT
 	Graph<T, U>::Graph()
 	{}
 
+	// Copy constructor
+	template <typename T, typename U>
+	Graph<T, U>::Graph(const Graph<T, U>& graph) :
+		numVerts{graph.numVerts}
+	{
+		for (const T& key : graph.vertTable)
+		{
+			Vertex* oldVert{ graph.vertTable[key] };
+			Vertex* newVert{ new Vertex(oldVert->value) };
+			newVert->edges = oldVert->edges;
+			vertTable[key] = newVert;
+		}
+	}
+
+	// Move constructor
+	template <typename T, typename U>
+	Graph<T, U>::Graph(Graph<T, U>&& graph) noexcept :
+		numVerts{graph.numVerts}
+	{
+		vertTable = graph.vertTable;
+		graph.vertTable.clear();
+		graph.numVerts = 0;
+	}
+
 	template <typename T, typename U>
 	Graph<T, U>::~Graph()
 	{
 		clear();
+	}
+
+	// Copy assignment
+	template <typename T, typename U>
+	Graph<T, U>& Graph<T, U>::operator=(const Graph<T, U>& graph)
+	{
+		if (&graph == this)
+			return *this;
+
+		clear();
+		numVerts = graph.numVerts;
+		for (const T& key : graph.vertTable)
+		{
+			Vertex* oldVert{ graph.vertTable[key] };
+			Vertex* newVert{ new Vertex(oldVert->value) };
+			newVert->edges = oldVert->edges;
+			vertTable[key] = newVert;
+		}
+		return *this;
+	}
+
+	// Move assignment
+	template <typename T, typename U>
+	Graph<T, U>& Graph<T, U>::operator=(Graph<T, U>&& graph) noexcept
+	{
+		clear();
+		vertTable = graph.vertTable;
+		graph.vertTable.clear();
+		graph.numVerts = 0;
+		return *this;
+
+	}
+
+	template <typename T, typename U>
+	U& Graph<T, U>::operator[](const T& key)
+	{
+		return getVertex(key);
+	}
+
+	template <typename T, typename U>
+	const U& Graph<T, U>::operator[](const T& key) const
+	{
+		return getVertex(key);
 	}
 
 	// Returns true if there aren't any vertices in the graph
@@ -65,18 +132,6 @@ namespace JADT
 			return vertTable[key]->value;
 
 		throw std::invalid_argument("Not a valid vertex key");
-	}
-
-	template <typename T, typename U>
-	U& Graph<T, U>::operator[](const T& key)
-	{
-		return getVertex(key);
-	}
-
-	template <typename T, typename U>
-	const U& Graph<T, U>::operator[](const T& key) const
-	{
-		return getVertex(key);
 	}
 
 	// Removes the vertex with the given key from the graph
