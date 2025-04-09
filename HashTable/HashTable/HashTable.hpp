@@ -114,6 +114,7 @@ namespace JADT
 				}
 			}
 		}
+		return *this;
 	}
 
 	// Move assignment
@@ -131,6 +132,8 @@ namespace JADT
 		table.numBuckets = 1;
 		table.buckets = new BucketLink*[1];
 		table.numPairs = 0;
+
+		return *this;
 	}
 
 	template <typename T, typename U>
