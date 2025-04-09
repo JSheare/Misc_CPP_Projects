@@ -83,6 +83,8 @@ namespace JADT
 		list.length = 0;
 		list.head = nullptr;
 		list.tail = nullptr;
+
+		return *this;
 	}
 
 	template <typename T>
