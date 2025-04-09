@@ -49,7 +49,7 @@ namespace JADT
 		std::size_t numBuckets{};
 		std::size_t numPairs{ 0 };
 		float maxLoad{ 1.0 };
-		std::hash<T> hasher;
+		std::hash<T> hasher{};
 
 		BucketLink* getBucketLink(const T& key);
 		BucketLink* getBucketLink(const T& key) const;
