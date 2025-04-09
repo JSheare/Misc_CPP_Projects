@@ -13,7 +13,11 @@ namespace JADT
 	{
 	public:
 		Heap(std::size_t capacity = 10);
+		Heap(const Heap<T, comparator>& heap);  // Copy constructor
+		Heap(Heap<T, comparator>&& heap) noexcept;  // Move constructor
 		~Heap();
+		Heap<T, comparator>& operator=(const Heap<T, comparator>& heap);  // Copy assignment
+		Heap<T, comparator>& operator=(Heap<T, comparator>&& heap);  // Move assignment
 		std::size_t size() const;
 		bool empty() const;
 		void insert(const T& item);
@@ -22,9 +26,9 @@ namespace JADT
 		void pop();
 
 	private:
+		std::size_t capacity{};
 		std::size_t heapSize{ 0 };
-		std::size_t capacity;
-		T* items;
+		T* items{};
 
 		std::size_t getParent(std::size_t index) const;
 		std::size_t getLeft(std::size_t index) const;
