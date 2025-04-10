@@ -12,7 +12,11 @@ namespace JADT
 	public:
 		Deque();
 		Deque(std::initializer_list<T> list);
+		Deque(const Deque<T>& deque);  // Copy constructor
+		Deque(Deque<T>&& deque) noexcept;  // Move constructor
 		~Deque();
+		Deque<T>& operator=(const Deque<T>& deque);  // Copy assignment
+		Deque<T>& operator=(Deque<T>&& deque) noexcept;  // Move assignment
 		std::size_t size() const;
 		bool empty() const;
 		void pushFront(const T& item);

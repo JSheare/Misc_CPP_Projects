@@ -22,13 +22,53 @@ namespace JADT
 	}
 
 	template <typename T>
-	Deque<T>::Deque(std::initializer_list<T> list) :
+	Deque<T>::Deque(std::initializer_list<T> list) : 
 		Deque<T>::Deque()
 	{
 		for (auto& item : list)
 		{
 			pushBack(item);
 		}
+	}
+
+	// Copy constructor
+	template <typename T>
+	Deque<T>::Deque(const Deque<T>& deque) :
+		mapSize{deque.mapSize}, frontBlock{deque.frontBlock}, backBlock{deque.backBlock}, 
+		numItems{deque.numItems}, startIndex{deque.numItems}, endIndex{deque.endIndex}
+	{
+		map = new T*[deque.mapSize];
+		for (std::size_t i{ 0 }; i < mapSize; ++i)
+		{
+			if (deque.map[i])
+			{
+				map[i] = new T[BLOCKSIZE];
+				for (std::size_t j{ 0 }; j < BLOCKSIZE; ++j)
+				{
+					map[i][j] = deque.map[i][j];
+				}
+			}
+			else
+				map[i] = nullptr;
+		}
+	}
+
+	// Move constructor
+	template <typename T>
+	Deque<T>::Deque(Deque<T>&& deque) noexcept :
+		mapSize{ deque.mapSize }, frontBlock{ deque.frontBlock }, backBlock{ deque.backBlock },
+		numItems{ deque.numItems }, startIndex{ deque.numItems }, endIndex{ deque.endIndex }, 
+		map{deque.map}
+	{
+		// Allocating exactly one block so that the old deque is still valid after the move
+		deque.mapSize = 1;
+		deque.frontBlock = 0;
+		deque.backBlock = 0;
+		deque.numItems = 0;
+		deque.startIndex = 0;
+		deque.endIndex = 0;
+		deque.map = new T*[1];
+		deque.map[0] = new T[BLOCKSIZE];
 	}
 
 	template <typename T>
@@ -41,18 +81,88 @@ namespace JADT
 		delete[] map;
 	}
 
+	// Copy assignment
+	template <typename T>
+	Deque<T>& Deque<T>::operator=(const Deque<T>& deque)
+	{
+		if (&deque == this)
+			return *this;
+
+		for (std::size_t i{ 0 }; i < mapSize; ++i)
+		{
+			delete[] map[i];
+		}
+		delete[] map;
+
+		mapSize = deque.mapSize;
+		frontBlock = deque.frontBlock;
+		backBlock = deque.backBlock;
+		numItems = deque.numItems;
+		startIndex = deque.numItems;
+		endIndex = deque.endIndex;
+		map = new T*[deque.mapSize];
+		for (std::size_t i{ 0 }; i < mapSize; ++i)
+		{
+			if (deque.map[i])
+			{
+				map[i] = new T[BLOCKSIZE];
+				for (std::size_t j{ 0 }; j < BLOCKSIZE; ++j)
+				{
+					map[i][j] = deque.map[i][j];
+				}
+			}
+			else
+				map[i] = nullptr;
+		}
+		return *this;
+	}
+
+	// Move assignment
+	template <typename T>
+	Deque<T>& Deque<T>::operator=(Deque<T>&& deque) noexcept
+	{
+		for (std::size_t i{ 0 }; i < mapSize; ++i)
+		{
+			delete[] map[i];
+		}
+		delete[] map;
+		
+		mapSize = deque.mapSize;
+		frontBlock = deque.frontBlock;
+		backBlock = deque.backBlock;
+		numItems = deque.numItems;
+		startIndex = deque.numItems;
+		endIndex = deque.endIndex;
+		map = deque.map;
+
+		// Allocating exactly one block so that the old deque is still valid after the move
+		deque.mapSize = 1;
+		deque.frontBlock = 0;
+		deque.backBlock = 0;
+		deque.numItems = 0;
+		deque.startIndex = 0;
+		deque.endIndex = 0;
+		deque.map = new T*[1];
+		deque.map[0] = new T[BLOCKSIZE];
+
+		return *this;
+	}
+
+	// Returns the number of items in the deque
 	template <typename T>
 	std::size_t Deque<T>::size() const
 	{
 		return numItems;
 	}
 
+	// Returns true if the deque has no items
 	template <typename T>
 	bool Deque<T>::empty() const
 	{
 		return numItems == 0;
 	}
 
+	// Pushes the given item to the front of the deque
 	template <typename T>
 	void Deque<T>::pushFront(const T& item)
 	{
@@ -63,6 +173,7 @@ namespace JADT
 			incrementEnd();
 	}
 
+	// Pushes the given item to the back of the deque
 	template <typename T>
 	void Deque<T>::pushBack(const T& item)
 	{
@@ -73,6 +184,7 @@ namespace JADT
 			decrementStart();
 	}
 
+	// Returns a reference to the item at the front of the deque. Throws std::out_of_range if the deque is empty
 	template <typename T>
 	T& Deque<T>::peekFront()
 	{
@@ -97,6 +209,7 @@ namespace JADT
 			return map[frontBlock][startIndex + 1];
 	}
 
+	// Returns a reference to the item at the back of the deque. Throws std::out_of_range if the deque is empty
 	template <typename T>
 	T& Deque<T>::peekBack()
 	{
@@ -121,6 +234,7 @@ namespace JADT
 			return map[backBlock][endIndex - 1];
 	}
 
+	// Removes the item at the front of the deque. Throws std::out_of_range if the deque is empty
 	template <typename T>
 	void Deque<T>::popFront()
 	{
@@ -131,6 +245,7 @@ namespace JADT
 		incrementStart();
 	}
 
+	// Removes hte item at the back of the deque. Throws std::out_of_range if the deque is empty
 	template <typename T>
 	void Deque<T>::popBack()
 	{
@@ -141,6 +256,7 @@ namespace JADT
 		decrementEnd();
 	}
 
+	// Resizes the queue to 2x its current size, with a bias toward the front if the given argument is true, and the back otherwise
 	template <typename T>
 	void Deque<T>::resize(bool resizeFront)
 	{
@@ -176,6 +292,7 @@ namespace JADT
 		mapSize = newMapSize;
 	}
 
+	// Increments the pointer to the front of the deque by one
 	template <typename T>
 	void Deque<T>::incrementStart()
 	{
@@ -187,6 +304,7 @@ namespace JADT
 		}
 	}
 
+	// Decrements the pointer to the front of the deque by one
 	template <typename T>
 	void Deque<T>::decrementStart()
 	{
@@ -205,6 +323,7 @@ namespace JADT
 		}
 	}
 
+	// Increments the pointer to the end of the deque by one
 	template <typename T>
 	void Deque<T>::incrementEnd()
 	{
@@ -222,6 +341,7 @@ namespace JADT
 		}
 	}
 
+	// Decrements the pointer to the end of the deque by one
 	template <typename T>
 	void Deque<T>::decrementEnd()
 	{
