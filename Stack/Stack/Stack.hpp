@@ -39,7 +39,13 @@ namespace JADT
 	}
 
 	template <typename T>
-	T& Stack<T>::top() const
+	T& Stack<T>::top()
+	{
+		return deque.peekBack();
+	}
+
+	template <typename T>
+	const T& Stack<T>::top() const
 	{
 		return deque.peekBack();
 	}

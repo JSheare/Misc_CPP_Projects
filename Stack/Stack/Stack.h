@@ -18,11 +18,12 @@ namespace JADT
 		std::size_t size() const;
 		bool empty() const;
 		void push(const T& item);
-		T& top() const;
+		T& top();
+		const T& top() const;
 		void pop();
 
 	private:
-		Deque<T> deque;
+		Deque<T> deque{};
 	};
 }
 #include "Stack.hpp"
