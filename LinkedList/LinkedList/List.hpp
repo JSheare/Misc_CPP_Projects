@@ -112,6 +112,7 @@ namespace JADT
 	{
 		return !(operator==(list1, list2));
 	}
+
 	template <typename T1> 
 	std::ostream& operator<<(std::ostream& out, const List<T1>& list)
 	{
@@ -132,15 +133,15 @@ namespace JADT
 		return out;
 	}
 
-	// Pushes the item to the front of the list
+	// Pushes the item to the front of the list. Supports perfect forwarding
 	template <typename T>
-	void List<T>::pushFront(const T& item)
+	template <typename U> void List<T>::pushFront(U&& item)
 	{
 		if (length == 0)
-			head = tail = new ListLink(item);
+			head = tail = new ListLink(static_cast<U&&>(item));
 		else
 		{
-			ListLink* newLink{ new ListLink(item) };
+			ListLink* newLink{ new ListLink(static_cast<U&&>(item)) };
 			newLink->next = head;
 			head->prev = newLink;
 			head = newLink;
@@ -148,15 +149,15 @@ namespace JADT
 		++length;
 	}
 
-	// Pushes the item to the back of the list
+	// Pushes the item to the back of the list. Supports perfect forwarding
 	template <typename T>
-	void List<T>::pushBack(const T& item)
+	template <typename U> void List<T>::pushBack(U&& item)
 	{
 		if (length == 0)
-			head = tail = new ListLink(item);
+			head = tail = new ListLink(static_cast<U&&>(item));
 		else
 		{
-			ListLink* newLink{ new ListLink(item) };
+			ListLink* newLink{ new ListLink(static_cast<U&&>(item)) };
 			newLink->prev = tail;
 			tail->next = newLink;
 			tail = newLink;
@@ -164,16 +165,16 @@ namespace JADT
 		++length;
 	}
 
-	// Inserts the item at the specified index. 
+	// Inserts the item at the specified index. Supports perfect forwarding.
 	// Appends to the end of the list if index is greater than or equal to the current length of the list
 	template <typename T>
-	void List<T>::insert(const T& item, std::size_t index)
+	template <typename U> void List<T>::insert(U&& item, std::size_t index)
 	{
 		if (length == 0)
-			head = tail = new ListLink(item);
+			head = tail = new ListLink(static_cast<U&&>(item));
 		else if (index >= length)
 		{
-			ListLink* newLink{ new ListLink(item) };
+			ListLink* newLink{ new ListLink(static_cast<U&&>(item)) };
 			newLink->prev = tail;
 			tail->next = newLink;
 			tail = newLink;
@@ -181,7 +182,7 @@ namespace JADT
 		// Inserting the item at the given index and moving everything else forward 
 		else
 		{
-			ListLink* newLink{ new ListLink(item) };
+			ListLink* newLink{ new ListLink(static_cast<U&&>(item)) };
 			ListLink* oldLink{ getLink(index) };
 			oldLink->prev->next = newLink;
 			newLink->prev = oldLink->prev;
@@ -532,6 +533,11 @@ namespace JADT
 
 	template <typename T>
 	List<T>::ListLink::ListLink(const T& data) :
+		data{ data }
+	{}
+
+	template <typename T>
+	List<T>::ListLink::ListLink(T&& data) noexcept :
 		data{ data }
 	{}
 

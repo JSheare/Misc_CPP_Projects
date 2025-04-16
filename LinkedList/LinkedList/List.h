@@ -32,9 +32,9 @@ namespace JADT
 		bool empty() const;
 		std::size_t size() const;
 		void clear();
-		void pushFront(const T& item);
-		void pushBack(const T& item);
-		void insert(const T& item, std::size_t index);
+		template <typename U> void pushFront(U&& item);
+		template <typename U> void pushBack(U&& item);
+		template <typename U> void insert(U&& item, std::size_t index);
 		T& front(); 
 		const T& front() const;
 		T& back();
@@ -71,6 +71,7 @@ namespace JADT
 			ListLink* prev{ nullptr };
 
 			ListLink(const T& data);
+			ListLink(T&& data) noexcept;
 		};
 
 		class ListIter
