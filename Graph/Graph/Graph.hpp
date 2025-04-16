@@ -106,12 +106,12 @@ namespace JADT
 		return vertTable.contains(key);
 	}
 
-	// Adds a vertex with the given key and value to the graph
+	// Adds a vertex with the given key and value to the graph. Supports perfect forwarding
 	template <typename T, typename U>
-	void Graph<T, U>::addVertex(const T& key, const U& value)
+	template <typename V, typename W> void Graph<T, U>::addVertex(V&& key, W&& value)
 	{
-		Vertex* newVertex{ new Vertex(value) };
-		vertTable[key] = newVertex;
+		Vertex* newVertex{ new Vertex(static_cast<W&&>(value)) };
+		vertTable[static_cast<V&&>(key)] = newVertex;
 		++numVerts;
 	}
 
@@ -238,6 +238,11 @@ namespace JADT
 
 	template <typename T, typename U>
 	Graph<T, U>::Vertex::Vertex(const U& value) :
+		value{ value }
+	{}
+
+	template <typename T, typename U>
+	Graph<T, U>::Vertex::Vertex(U&& value) :
 		value{ value }
 	{}
 }

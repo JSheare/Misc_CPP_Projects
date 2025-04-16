@@ -25,7 +25,7 @@ namespace JADT
 		bool empty() const;
 		std::size_t size() const;
 		bool contains(const T& key) const;
-		void addVertex(const T& key, const U& value);
+		template <typename V, typename W> void addVertex(V&& key, W&& value);
 		U& getVertex(const T& key);
 		const U& getVertex(const T& key) const;
 		void removeVertex(const T& key);
@@ -47,6 +47,7 @@ namespace JADT
 			HashTable<T, int> edges{ 1 };
 
 			Vertex(const U& value);
+			Vertex(U&& value);
 		};
 	};
 }
