@@ -19,8 +19,8 @@ namespace JADT
 		Deque<T>& operator=(Deque<T>&& deque) noexcept;  // Move assignment
 		std::size_t size() const;
 		bool empty() const;
-		void pushFront(const T& item);
-		void pushBack(const T& item);
+		template <typename U> void pushFront(U&& item);
+		template <typename U> void pushBack(U&& item);
 		T& peekFront();
 		const T& peekFront() const;
 		T& peekBack();

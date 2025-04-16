@@ -162,22 +162,22 @@ namespace JADT
 		return numItems == 0;
 	}
 
-	// Pushes the given item to the front of the deque
+	// Pushes the given item to the front of the deque. Supports perfect forwarding
 	template <typename T>
-	void Deque<T>::pushFront(const T& item)
+	template <typename U> void Deque<T>::pushFront(U&& item)
 	{
-		map[frontBlock][startIndex] = item;
+		map[frontBlock][startIndex] = static_cast<U&&>(item);
 		++numItems;
 		decrementStart();
 		if (numItems == 1)
 			incrementEnd();
 	}
 
-	// Pushes the given item to the back of the deque
+	// Pushes the given item to the back of the deque. Supports perfect forwarding
 	template <typename T>
-	void Deque<T>::pushBack(const T& item)
+	template <typename U> void Deque<T>::pushBack(U&& item)
 	{
-		map[backBlock][endIndex] = item;
+		map[backBlock][endIndex] = static_cast<U&&>(item);
 		++numItems;
 		incrementEnd();
 		if (numItems == 1)
