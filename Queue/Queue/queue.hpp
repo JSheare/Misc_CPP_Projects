@@ -39,7 +39,13 @@ namespace JADT
 	}
 
 	template <typename T>
-	T& Queue<T>::front() const
+	T& Queue<T>::front()
+	{
+		return deque.peekFront();
+	}
+
+	template <typename T>
+	const T& Queue<T>::front() const
 	{
 		return deque.peekFront();
 	}

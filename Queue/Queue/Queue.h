@@ -18,11 +18,12 @@ namespace JADT
 		std::size_t size() const;
 		bool empty() const;
 		void push(const T& data);
-		T& front() const;
+		T& front();
+		const T& front() const;
 		void pop();
 
 	private:
-		Deque<T> deque;
+		Deque<T> deque{};
 	};
 }
 #include "Queue.hpp"
