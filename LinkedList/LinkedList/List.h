@@ -71,7 +71,7 @@ namespace JADT
 			ListLink* prev{ nullptr };
 
 			ListLink(const T& data);
-			ListLink(T&& data) noexcept;
+			ListLink(T&& data);
 		};
 
 		class ListIter

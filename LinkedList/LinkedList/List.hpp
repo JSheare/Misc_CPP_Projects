@@ -537,7 +537,7 @@ namespace JADT
 	{}
 
 	template <typename T>
-	List<T>::ListLink::ListLink(T&& data) noexcept :
+	List<T>::ListLink::ListLink(T&& data) :
 		data{ data }
 	{}
 
