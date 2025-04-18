@@ -17,7 +17,7 @@ namespace JADT
 		Stack(std::initializer_list<T> list);
 		std::size_t size() const;
 		bool empty() const;
-		void push(const T& item);
+		template <typename U> void push(U&& item);
 		T& top();
 		const T& top() const;
 		void pop();

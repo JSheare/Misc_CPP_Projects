@@ -33,9 +33,9 @@ namespace JADT
 	}
 
 	template <typename T>
-	void Stack<T>::push(const T& item)
+	template <typename U> void Stack<T>::push(U&& item)
 	{
-		deque.pushBack(item);
+		deque.pushBack(static_cast<U&&>(item));
 	}
 
 	template <typename T>
