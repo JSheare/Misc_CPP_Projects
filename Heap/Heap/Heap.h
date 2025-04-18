@@ -20,7 +20,7 @@ namespace JADT
 		Heap<T, comparator>& operator=(Heap<T, comparator>&& heap);  // Move assignment
 		std::size_t size() const;
 		bool empty() const;
-		void insert(const T& item);
+		template <typename U> void insert(U&& item);
 		T& top();
 		const T& top() const;
 		void pop();

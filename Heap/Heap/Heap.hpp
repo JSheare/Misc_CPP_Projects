@@ -94,14 +94,14 @@ namespace JADT
 		return heapSize == 0;
 	}
 
-	// Inserts the given item into the heap
+	// Inserts the given item into the heap. Supports perfect forwarding
 	template <typename T, bool (*comparator)(const T&, const T&)>
-	void Heap<T, comparator>::insert(const T& item)
+	template <typename U> void Heap<T, comparator>::insert(U&& item)
 	{
 		if (heapSize == capacity)
 			resize();
 		
-		items[heapSize] = item;
+		items[heapSize] = static_cast<U&&>(item);
 		heapifyUp(heapSize++);
 	}
 
