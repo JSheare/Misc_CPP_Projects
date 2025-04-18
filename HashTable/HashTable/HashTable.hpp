@@ -61,6 +61,7 @@ namespace JADT
 		// Allocating exactly one bucket in the old table so that it's still valid after the move
 		table.numBuckets = 1;
 		table.buckets = new BucketLink*[1];
+		table.buckets[0] = nullptr;
 		table.numPairs = 0;
 	}
 
@@ -131,15 +132,16 @@ namespace JADT
 		// Allocating exactly one bucket in the old table so that it's still valid after the move
 		table.numBuckets = 1;
 		table.buckets = new BucketLink*[1];
+		table.buckets[0] = nullptr;
 		table.numPairs = 0;
 
 		return *this;
 	}
 
 	template <typename T, typename U>
-	U& HashTable<T, U>::operator[](const T& key)
+	template <typename V> U& HashTable<T, U>::operator[](V&& key)
 	{
-		return find(key);
+		return find(static_cast<V&&>(key));
 	}
 
 	template <typename T, typename U>
@@ -181,18 +183,18 @@ namespace JADT
 		return false;
 	}
 
-	// Inserts the given key-value pair, or updates the value for the given key. Note that calling this method may invalidate iterators
+	// Inserts the given key-value pair, or updates the value for the given key. Note that calling this method may invalidate iterators. Supports perfect forwarding
 	template <typename T, typename U>
-	void HashTable<T, U>::insert(const T& key, const U& value)
+	template <typename V, typename W> void HashTable<T, U>::insert(V&& key, W&& value)
 	{
-		getBucketLink(key)->value = value;
+		getBucketLink(static_cast<V&&>(key))->value = static_cast<W&&>(value);
 	}
 
-	// Returns the value for the given key. Note that calling this method may cause a rehash which would invalidate iterators
+	// Returns the value for the given key. Note that calling this method may cause a rehash which would invalidate iterators. Supports perfect forwarding
 	template <typename T, typename U>
-	U& HashTable<T, U>::find(const T& key)
+	template <typename V> U& HashTable<T, U>::find(V&& key)
 	{
-		return getBucketLink(key)->value;
+		return getBucketLink(static_cast<V&&>(key))->value;
 	}
 
 	template <typename T, typename U>
@@ -364,9 +366,9 @@ namespace JADT
 		delete[] oldBuckets;
 	}
 
-	// Returns an iterator to the beginning of the hash table. Iterators return references to keys
+	// Returns an iterator to the beginning of the hash table. Iterators return constant references to keys
 	template <typename T, typename U>
-	HashTable<T, U>::HTIter HashTable<T, U>::begin()
+	HashTable<T, U>::HTIter HashTable<T, U>::begin() const
 	{
 		for (std::size_t i{ 0 }; i < numBuckets; ++i)
 		{
@@ -376,35 +378,16 @@ namespace JADT
 		return end();
 	}
 
-	// Returns an iterator to one past the end of the hash table
+	// Returns an iterator to one past the end of the hash table. Iterators return constant references to keys
 	template <typename T, typename U>
-	HashTable<T, U>::HTIter HashTable<T, U>::end()
+	HashTable<T, U>::HTIter HashTable<T, U>::end() const
 	{
 		return HTIter(buckets + numBuckets, nullptr, 0);
 	}
 
-	// Returns a constant iterator to the beginning of the hash table. Constant iterators return constant references to keys
+	// Returns the link with the given key. Creates a new link if no link with the given key exists.  Supports perfect forwarding
 	template <typename T, typename U>
-	HashTable<T, U>::ConstHTIter HashTable<T, U>::begin() const
-	{
-		for (std::size_t i{ 0 }; i < numBuckets; ++i)
-		{
-			if (buckets[i])
-				return ConstHTIter(buckets + i, buckets[i], numBuckets - i);
-		}
-		return end();
-	}
-
-	// Returns a constant iterator to one past the end of the hash table
-	template <typename T, typename U>
-	HashTable<T, U>::ConstHTIter HashTable<T, U>::end() const
-	{
-		return ConstHTIter(buckets + numBuckets, nullptr, 0);
-	}
-
-	// Returns the link with the given key. Creates a new link if no link with the given key exists
-	template <typename T, typename U>
-	HashTable<T, U>::BucketLink* HashTable<T, U>::getBucketLink(const T& key)
+	template <typename V> HashTable<T, U>::BucketLink* HashTable<T, U>::getBucketLink(V&& key)
 	{
 		std::size_t index{ bucket(key) };
 		BucketLink* curr{ nullptr };
@@ -432,7 +415,7 @@ namespace JADT
 			buckets[index] = curr;
 		}
 
-		curr->key = key;
+		curr->key = static_cast<V&&>(key);
 		++numPairs;
 		if (loadFactor() >= maxLoadFactor())
 			rehash();
@@ -473,7 +456,7 @@ namespace JADT
 	{}
 
 	template <typename T, typename U>
-	T& HashTable<T, U>::HTIter::operator*()
+	const T& HashTable<T, U>::HTIter::operator*()
 	{
 		return currentLink->key;
 	}
@@ -512,19 +495,6 @@ namespace JADT
 	bool HashTable<T, U>::HTIter::operator!=(const HTIter& iterator) const
 	{
 		return !operator==(iterator);
-	}
-
-	// Constant hash table iterator implementation
-
-	template <typename T, typename U>
-	HashTable<T, U>::ConstHTIter::ConstHTIter(BucketLink** bucketHead, BucketLink* currentLink, std::size_t bucketsLeft) :
-		HTIter(bucketHead, currentLink, bucketsLeft)
-	{}
-
-	template <typename T, typename U>
-	const T& HashTable<T, U>::ConstHTIter::operator*()
-	{
-		return HTIter::currentLink->key;
 	}
 }
 #endif

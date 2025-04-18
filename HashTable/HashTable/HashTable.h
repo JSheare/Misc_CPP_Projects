@@ -12,7 +12,6 @@ namespace JADT
 	private:
 		class BucketLink;
 		class HTIter;
-		class ConstHTIter;
 
 	public:
 		HashTable(std::size_t numBuckets = 10);
@@ -21,13 +20,13 @@ namespace JADT
 		~HashTable();
 		HashTable<T, U>& operator=(const HashTable<T, U>& table);  // Copy assignment
 		HashTable<T, U>& operator=(HashTable<T, U>&& table) noexcept;  // Move assignment
-		U& operator[](const T& key);
+		template <typename V> U& operator[](V&& key);
 		const U& operator[](const T& key) const;
 		bool empty() const;
 		std::size_t size() const;
 		bool contains(const T& key) const;
-		void insert(const T& key, const U& value);
-		U& find(const T& key);
+		template <typename V, typename W> void insert(V&& key, W&& value);
+		template <typename V> U& find(V&& key);
 		const U& find(const T& key) const;
 		void remove(const T& key);
 		void clear();
@@ -39,10 +38,8 @@ namespace JADT
 		void maxLoadFactor(float max);
 		void reserve(std::size_t count);
 		void rehash(std::size_t count = 1);
-		HTIter begin();
-		HTIter end();
-		ConstHTIter begin() const;
-		ConstHTIter end() const;
+		HTIter begin() const;
+		HTIter end() const;
 		
 	private:
 		BucketLink** buckets{};
@@ -51,7 +48,7 @@ namespace JADT
 		float maxLoad{ 1.0 };
 		std::hash<T> hasher{};
 
-		BucketLink* getBucketLink(const T& key);
+		template <typename V> BucketLink* getBucketLink(V&& key);
 		BucketLink* getBucketLink(const T& key) const;
 
 		class BucketLink
@@ -68,7 +65,7 @@ namespace JADT
 		{
 		public:
 			HTIter(BucketLink** bucketHead, BucketLink* currentLink, std::size_t bucketsLeft);
-			T& operator*();
+			const T& operator*();
 			void operator++();
 			bool operator==(const HTIter& iterator) const;
 			bool operator!=(const HTIter& iterator) const;
@@ -77,13 +74,6 @@ namespace JADT
 			BucketLink** bucketHead{ nullptr };
 			BucketLink* currentLink{ nullptr };
 			std::size_t bucketsLeft;  // The number of buckets left until the end (one past the end of the bucket array)
-		};
-
-		class ConstHTIter : public HTIter
-		{
-		public:
-			ConstHTIter(BucketLink** bucketHead, BucketLink* currentLink, std::size_t bucketsLeft);
-			const T& operator*();
 		};
 	};
 }
