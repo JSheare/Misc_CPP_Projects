@@ -17,7 +17,7 @@ namespace JADT
 		Queue(std::initializer_list<T> list);
 		std::size_t size() const;
 		bool empty() const;
-		void push(const T& data);
+		template <typename U> void push(U&& data);
 		T& front();
 		const T& front() const;
 		void pop();
