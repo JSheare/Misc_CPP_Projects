@@ -1,12 +1,12 @@
-#ifndef JADT_LIST_HPP
-#define JADT_LIST_HPP
+#ifndef JML_LIST_HPP
+#define JML_LIST_HPP
 
 #include <cstddef>
 #include <initializer_list>
 #include <iostream>
 #include <stdexcept>
 
-namespace JADT
+namespace JML
 {
 	template <typename T>
 	List<T>::List()

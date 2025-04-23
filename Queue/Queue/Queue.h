@@ -1,5 +1,5 @@
-#ifndef JADT_QUEUE_H
-#define JADT_QUEUE_H
+#ifndef JML_QUEUE_H
+#define JML_QUEUE_H
 
 #include <cstddef>
 #include <initializer_list>
@@ -7,7 +7,7 @@
 
 #include "Deque.h"
 
-namespace JADT
+namespace JML
 {
 	template <typename T>
 	class Queue

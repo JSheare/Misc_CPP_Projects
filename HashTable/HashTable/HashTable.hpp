@@ -1,11 +1,11 @@
-#ifndef JADT_HASH_TABLE_HPP
-#define JADT_HASH_TABLE_HPP
+#ifndef JML_HASH_TABLE_HPP
+#define JML_HASH_TABLE_HPP
 
 #include <cstddef>
 #include <functional>
 #include <stdexcept>
 
-namespace JADT
+namespace JML
 {
 	template <typename T, typename U>
 	HashTable<T, U>::HashTable(std::size_t numBuckets) :

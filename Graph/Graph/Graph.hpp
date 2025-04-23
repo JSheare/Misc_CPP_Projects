@@ -1,12 +1,12 @@
-#ifndef JADT_GRAPH_HPP
-#define JADT_GRAPH_HPP
+#ifndef JML_GRAPH_HPP
+#define JML_GRAPH_HPP
 
 #include <cstddef>
 #include <stdexcept>
 
 #include "HashTable.h"
 
-namespace JADT
+namespace JML
 {
 	template <typename T, typename U>
 	Graph<T, U>::Graph()

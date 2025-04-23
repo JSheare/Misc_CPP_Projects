@@ -5,7 +5,7 @@
 
 int main()
 {
-    JADT::Stack<int> stack;
+    JML::Stack<int> stack;
     for (int i{ 0 }; i < 100; ++i)
     {
         std::cout << "Pushing: " << i << '\n';

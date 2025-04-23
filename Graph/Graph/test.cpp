@@ -14,9 +14,9 @@ bool compareEdge(const EdgePair& pair1, const EdgePair& pair2)
 	return pair1.weight < pair2.weight;
 }
 
-JADT::Graph<char, int> makeGraph()
+JML::Graph<char, int> makeGraph()
 {
-	JADT::Graph<char, int> test;
+	JML::Graph<char, int> test;
 	for (int i{ 0 }; i < 26; ++i)
 	{
 		char key{ static_cast<char>('a' + i) };
@@ -28,7 +28,7 @@ JADT::Graph<char, int> makeGraph()
 
 int main()
 {
-	JADT::Graph<char, int> test;
+	JML::Graph<char, int> test;
 	std::cout << "Adding Vertices to graph:\n";
 	for (int i{ 0 }; i < 26; ++i)
 	{
@@ -55,7 +55,7 @@ int main()
 	std::cout << "Getting the weight of the edge from a to b: " << test.getWeight('a', 'b') << "\n\n";
 
 	std::cout << "Doing a BFS of the graph by edge weight:\n";
-	JADT::Heap<EdgePair, compareEdge> pq;
+	JML::Heap<EdgePair, compareEdge> pq;
 	pq.insert(EdgePair('a', 0));
 	while (!pq.empty())
 	{

@@ -1,10 +1,10 @@
-#ifndef JADT_HASH_TABLE_H
-#define JADT_HASH_TABLE_H
+#ifndef JML_HASH_TABLE_H
+#define JML_HASH_TABLE_H
 
 #include <cstddef>
 #include <functional>
 
-namespace JADT
+namespace JML
 {
 	template <typename T, typename U = T>
 	class HashTable

@@ -1,5 +1,5 @@
-#ifndef JADT_STACK_H
-#define JADT_STACK_H
+#ifndef JML_STACK_H
+#define JML_STACK_H
 
 #include <cstddef>
 #include <initializer_list>
@@ -7,7 +7,7 @@
 
 #include "Deque.h"
 
-namespace JADT
+namespace JML
 {
 	template <typename T>
 	class Stack

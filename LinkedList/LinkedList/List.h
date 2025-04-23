@@ -1,12 +1,12 @@
-#ifndef JADT_LIST_H
-#define JADT_LIST_H
+#ifndef JML_LIST_H
+#define JML_LIST_H
 
 #include <cstddef>
 #include <initializer_list>
 #include <iostream>
 #include <stdexcept>
 
-namespace JADT
+namespace JML
 {
 	template <typename T>
 	class List

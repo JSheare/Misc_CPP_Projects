@@ -6,7 +6,7 @@
 int main()
 {
     std::cout << "Max heap with starting capacity 2:" << '\n';
-    JADT::Heap<int> minHeap{ 2 };
+    JML::Heap<int> minHeap{ 2 };
     minHeap.insert(5);
     minHeap.insert(17);
     minHeap.insert(3);
@@ -22,7 +22,7 @@ int main()
 
     std::cout << '\n';
     std::cout << "Min heap:" << '\n';
-    JADT::Heap<int, [](const int& x, const int& y) {return x < y; } > maxHeap;
+    JML::Heap<int, [](const int& x, const int& y) {return x < y; } > maxHeap;
     maxHeap.insert(5);
     maxHeap.insert(17);
     maxHeap.insert(3);

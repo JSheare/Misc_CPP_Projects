@@ -1,11 +1,11 @@
-#ifndef JADT_STACK_HPP
-#define JADT_STACK_HPP
+#ifndef JML_STACK_HPP
+#define JML_STACK_HPP
 
 #include <cstddef>
 #include <initializer_list>
 #include <stdexcept>
 
-namespace JADT
+namespace JML
 {
 	template <typename T>
 	Stack<T>::Stack()

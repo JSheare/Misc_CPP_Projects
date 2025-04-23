@@ -5,7 +5,7 @@
 
 int main()
 {
-    JADT::Queue<int> queue;
+    JML::Queue<int> queue;
     for (int i{ 0 }; i < 100; ++i)
     {
         std::cout << "Pushing: " << i << '\n';

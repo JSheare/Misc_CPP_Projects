@@ -9,7 +9,7 @@ bool descending(int x, int y)
 
 int main()
 {
-	JADT::List<int> list{ 678459, 56347, 35, 53, 1, 867, 2, 4, 12, 42, 543, 3, 654, 34, 15, 78 };
+	JML::List<int> list{ 678459, 56347, 35, 53, 1, 867, 2, 4, 12, 42, 543, 3, 654, 34, 15, 78 };
 
 	list.pushBack(5);
 	list.pushFront(10);

@@ -1,11 +1,11 @@
-#ifndef JADT_GRAPH_H
-#define JADT_GRAPH_H
+#ifndef JML_GRAPH_H
+#define JML_GRAPH_H
 
 #include <cstddef>
 
 #include "HashTable.h"
 
-namespace JADT
+namespace JML
 {
 	template <typename T, typename U = T>
 	class Graph

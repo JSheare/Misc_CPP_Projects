@@ -1,11 +1,11 @@
-#ifndef JADT_QUEUE_HPP
-#define JADT_QUEUE_HPP
+#ifndef JML_QUEUE_HPP
+#define JML_QUEUE_HPP
 
 #include <cstddef>
 #include <initializer_list>
 #include <stdexcept>
 
-namespace JADT
+namespace JML
 {
 	template <typename T>
 	Queue<T>::Queue()

@@ -1,11 +1,10 @@
-#if 1
 #include <iostream>
 
 #include "Deque.h"
 
 int main()
 {
-    JADT::Deque<int> deque;
+    JML::Deque<int> deque;
     int range{ 100 };
     for (int i{ 0 }; i < range; ++i)
     {
@@ -71,6 +70,4 @@ int main()
         }
         front = !front;
     }
-
 }
-#endif

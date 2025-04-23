@@ -1,10 +1,10 @@
-#ifndef JADT_HEAP_HPP
-#define JADT_HEAP_HPP
+#ifndef JML_HEAP_HPP
+#define JML_HEAP_HPP
 
 #include <cstddef>
 #include <stdexcept>
 
-namespace JADT
+namespace JML
 {
 	template <typename T>
 	bool heapGreater(const T& x, const T& y)

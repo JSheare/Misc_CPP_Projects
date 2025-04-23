@@ -4,7 +4,7 @@
 
 int main()
 {
-	JADT::HashTable<char, int> test;
+	JML::HashTable<char, int> test;
 	std::cout << "Adding pairs to hash table:\n";
 	for (int i{ 0 }; i < 26; ++i)
 	{

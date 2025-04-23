@@ -1,11 +1,11 @@
-#ifndef JADT_DEQUEUE_HPP
-#define JADT_DEQUEUE_HPP
+#ifndef JML_DEQUEUE_HPP
+#define JML_DEQUEUE_HPP
 
 #include <cstddef>
 #include <initializer_list>
 #include <stdexcept>
 
-namespace JADT
+namespace JML
 {
 	template <typename T>
 	Deque<T>::Deque()

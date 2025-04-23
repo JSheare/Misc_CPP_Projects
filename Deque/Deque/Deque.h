@@ -1,10 +1,10 @@
-#ifndef JADT_DEQUEUE_H
-#define JADT_DEQUEUE_H
+#ifndef JML_DEQUEUE_H
+#define JML_DEQUEUE_H
 
 #include <cstddef>
 #include <initializer_list>
 
-namespace JADT
+namespace JML
 {
 	template <typename T>
 	class Deque
