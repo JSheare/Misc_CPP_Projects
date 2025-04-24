@@ -1,7 +1,6 @@
 #ifndef JML_LIST_H
 #define JML_LIST_H
 
-#include <cstddef>
 #include <initializer_list>
 #include <iostream>
 #include <stdexcept>
@@ -48,7 +47,7 @@ namespace JML
 		bool contains(const T& item) const;
 		List<T> slice(std::size_t start, std::size_t end) const;
 		void sort();
-		template <typename U> void sort(bool(*comparisonFcn)(U, U)=ascendingComparison);  // Custom comparison function
+		template <typename U> void sort(bool(*comparisonFcn)(U, U));  // Custom comparison function
 		ListIter begin();
 		ListIter end();
 		ConstListIter begin() const;
@@ -60,7 +59,7 @@ namespace JML
 		ListLink* tail{ nullptr };
 
 		ListLink* getLink(std::size_t index) const;
-		template <typename U> static List<T>& mergeSort(List<T>& list, bool (*comparisonFcn)(U, U));
+		template <typename U> ListLink* mergeSort(ListLink* head, std::size_t length, bool (*comparisonFcn)(U, U));
 		static bool ascendingComparison(T& x, T& y);
 
 		class ListLink
@@ -70,6 +69,7 @@ namespace JML
 			ListLink* next{ nullptr };
 			ListLink* prev{ nullptr };
 
+			ListLink() = default;
 			ListLink(const T& data);
 			ListLink(T&& data);
 		};

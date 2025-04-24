@@ -1,7 +1,6 @@
 #ifndef JML_LIST_HPP
 #define JML_LIST_HPP
 
-#include <cstddef>
 #include <initializer_list>
 #include <iostream>
 #include <stdexcept>
@@ -26,12 +25,22 @@ namespace JML
 	template <typename T>
 	List<T>::List(const List<T>& list)
 	{
-		ListLink* currentLink{ list.head };
-		while (currentLink)
+		length = list.length;
+		ListLink* curr{ list.head };
+		ListLink* copyPrev{ nullptr };
+		ListLink* copyCurr{ new ListLink(curr->data) };
+		head = copyCurr;
+		curr = curr->next;
+		copyPrev = copyCurr;
+		while (curr)
 		{
-			pushBack(currentLink->data);
-			currentLink = currentLink->next;
+			copyCurr = new ListLink(curr->data);
+			copyCurr->prev = copyPrev;
+			copyPrev->next = copyCurr;
+			curr = curr->next;
+			copyPrev = copyCurr;
 		}
+		tail = copyPrev;
 	}
 
 	// Move constructor
@@ -61,12 +70,22 @@ namespace JML
 
 		clear();
 
-		ListLink* currentLink{ list.head };
-		while (currentLink)
+		length = list.length;
+		ListLink* curr{ list.head };
+		ListLink* copyPrev{ nullptr };
+		ListLink* copyCurr{ new ListLink(curr->data) };
+		head = copyCurr;
+		curr = curr->next;
+		copyPrev = copyCurr;
+		while (curr)
 		{
-			pushBack(currentLink->data);
-			currentLink = currentLink->next;
+			copyCurr = new ListLink(curr->data);
+			copyCurr->prev = copyPrev;
+			copyPrev->next = copyCurr;
+			curr = curr->next;
+			copyPrev = copyCurr;
 		}
+		tail = copyPrev;
 		return *this;
 	}
 
@@ -102,9 +121,18 @@ namespace JML
 	template <typename T>
 	bool operator==(const List<T>& list1, const List<T>& list2)
 	{
-		return (list1.length == list2.length
-			&& list1.head == list2.head
-			&& list1.tail == list2.tail);
+		if (list1.length == list2.length)
+		{
+			typename List<T>::ListLink* oneCurr{ list1.head };
+			typename List<T>::ListLink* twoCurr{ list2.head };
+			while (oneCurr)
+			{
+				if (oneCurr->data != twoCurr->data)
+					return false;
+			}
+			return true;
+		}
+		return false;
 	}
 
 	template <typename T>
@@ -393,18 +421,18 @@ namespace JML
 		return slice;
 	}
 
-	// Sorts the list with a merge sort algorithm
+	// Sorts the list with a merge sort algorithm. Ascending sort by default.
 	template <typename T>
 	void List<T>::sort()  // overload for default
 	{
-		mergeSort(*this, ascendingComparison);
+		sort(ascendingComparison);
 	}
 
 	// Sorts the list with a merge sort algorithm
 	template <typename T>  // Custom comparison function
 	template <typename U> void List<T>::sort(bool(*comparisonFcn)(U, U))
 	{
-		mergeSort(*this, comparisonFcn);
+		mergeSort(head, length, comparisonFcn);
 	}
 
 	// Returns an iterator to the beginning of the list
@@ -474,52 +502,68 @@ namespace JML
 
 	// Merge sort algorithm implementation
 	template <typename T>
-	template <typename U> List<T>& List<T>::mergeSort(List<T>& list, bool (*comparisonFcn)(U, U))
+	template <typename U> List<T>::ListLink* List<T>::mergeSort(List<T>::ListLink* subHead, std::size_t subLength, bool (*comparisonFcn)(U, U))
 	{
-		if (list.length > 1)
+		if (subLength > 1)
 		{
-			// Recursive sorts on the two halves of the list
-			std::size_t midpoint{ list.length / 2 };
-
-			List<T> left{ list.slice(0, midpoint) };
-			mergeSort(left, comparisonFcn);
-
-			List<T> right{ list.slice(midpoint, list.length) };
-			mergeSort(right, comparisonFcn);
-
-			ListLink* currentLeft{ left.head };
-			ListLink* currentRight{ right.head };
-			ListLink* currentLink{ list.head };
-
-			while (currentLeft && currentRight)
+			// Splitting the list in half
+			std::size_t midpoint{ subLength / 2 };
+			ListLink* right{ subHead };
+			for (std::size_t i{ 0 }; i < midpoint; ++i)
 			{
-				if (comparisonFcn(currentLeft->data, currentRight->data))
+				right = right->next;
+			}
+			if (right->prev)
+				right->prev->next = nullptr;
+
+			right->prev = nullptr;
+
+			// Recursive sorts on the two halves of the list
+			ListLink* left{ mergeSort(subHead, midpoint, comparisonFcn) };
+			right = mergeSort(right, subLength - midpoint, comparisonFcn);
+
+			// Merging the two sorted halves
+			ListLink dummy{};
+			ListLink* curr{ &dummy };
+			while (left && right)
+			{
+				if (comparisonFcn(left->data, right->data))
 				{
-					currentLink->data = currentLeft->data;
-					currentLeft = currentLeft->next;
+					curr->next = left;
+					left->prev = curr;
+					left = left->next;
 				}
 				else
 				{
-					currentLink->data = currentRight->data;
-					currentRight = currentRight->next;
+					curr->next = right;
+					right->prev = curr;
+					right = right->next;
 				}
-
-				currentLink = currentLink->next;
+				curr = curr->next;
 			}
-			while (currentLeft)
+			while (left)
 			{
-				currentLink->data = currentLeft->data;
-				currentLeft = currentLeft->next;
-				currentLink = currentLink->next;
+				curr->next = left;
+				left->prev = curr;
+				left = left->next;
+				curr = curr->next;
 			}
-			while (currentRight)
+			while (right)
 			{
-				currentLink->data = currentRight->data;
-				currentRight = currentRight->next;
-				currentLink = currentLink->next;
+				curr->next = right;
+				right->prev = curr;
+				right = right->next;
+				curr = curr->next;
 			}
+			// Saving the final sorted list
+			if (subLength == length)
+			{
+				head = dummy.next;
+				tail = curr;
+			}
+			return dummy.next;
 		}
-		return list;
+		return subHead;
 	}
 
 	// Default comparison function for sort(). Results in an ascending order sort
