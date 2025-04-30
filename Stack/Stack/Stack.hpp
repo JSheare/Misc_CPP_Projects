@@ -20,6 +20,18 @@ namespace JML
 		}
 	}
 
+	template <typename T1>
+	bool operator==(const Stack<T1>& stack1, const Stack<T1>& stack2)
+	{
+		return stack1.deque == stack2.deque;
+	}
+
+	template <typename T1>
+	bool operator!=(const Stack<T1>& stack1, const Stack<T1>& stack2)
+	{
+		return !operator==(stack1, stack2);
+	}
+
 	template <typename T>
 	std::size_t Stack<T>::size() const
 	{
