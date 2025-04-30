@@ -148,6 +148,46 @@ namespace JML
 		return *this;
 	}
 
+	template <typename T>
+	bool operator==(const Deque<T>& deque1, const Deque<T>& deque2)
+	{
+		if (deque1.numItems == deque2.numItems)
+		{
+			std::size_t block1{ deque1.frontBlock };
+			std::size_t block2{ deque2.frontBlock };
+			std::size_t index1{ deque1.startIndex };
+			std::size_t index2{ deque2.startIndex };
+			while (true)
+			{
+				if (deque1.map[block1][index1] != deque2.map[block2][index2])
+					return false;
+
+				++index1;
+				++index2;
+				if (index1 == deque1.BLOCKSIZE)
+				{
+					++block1;
+					index1 = 0;
+				}
+				if (index2 == deque2.BLOCKSIZE)
+				{
+					++block2;
+					index2 = 0;
+				}
+				if ((block1 == deque1.backBlock && index1 > deque1.endIndex) || (block1 > deque1.backBlock))
+					break;
+			}
+			return true;
+		}
+		return false;
+	}
+
+	template <typename T>
+	bool operator!=(const Deque<T>& deque1, const Deque<T>& deque2)
+	{
+		return !operator==(deque1, deque2);
+	}
+
 	// Returns the number of items in the deque
 	template <typename T>
 	std::size_t Deque<T>::size() const

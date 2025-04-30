@@ -17,6 +17,8 @@ namespace JML
 		~Deque();
 		Deque<T>& operator=(const Deque<T>& deque);  // Copy assignment
 		Deque<T>& operator=(Deque<T>&& deque) noexcept;  // Move assignment
+		friend bool operator==(const Deque<T>& deque1, const Deque<T>& deque2);
+		friend bool operator!=(const Deque<T>& deque1, const Deque<T>& deque2);
 		std::size_t size() const;
 		bool empty() const;
 		template <typename U> void pushFront(U&& item);
