@@ -163,7 +163,7 @@ namespace JML
 	template <typename T1, typename U1>
 	bool operator!=(const HashTable<T1, U1>& table1, const HashTable<T1, U1>& table2)
 	{
-		return operator==(table1, table2);
+		return !operator==(table1, table2);
 	}
 
 	template <typename T, typename U>

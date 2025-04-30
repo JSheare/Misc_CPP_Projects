@@ -73,14 +73,34 @@ namespace JML
 
 	}
 
-	template <typename T, typename U>
-	bool operator==(const Graph<T, U>& graph1, const Graph<T, U>& graph2)
+	template <typename T1, typename U1>
+	bool operator==(const Graph<T1, U1>& graph1, const Graph<T1, U1>& graph2)
 	{
-
+		if (graph1.numVerts == graph2.numVerts)
+		{
+			typename Graph<T1, U1>::Vertex* vertex1{ nullptr };
+			typename Graph<T1, U1>::Vertex* vertex2{ nullptr };
+			for (const T1& key : graph1.vertTable)
+			{
+				try
+				{
+					vertex1 = graph1.vertTable[key];
+					vertex2 = graph2.vertTable[key];
+					if ((vertex1->value != vertex2->value) || (vertex1->edges != vertex2->edges))
+						return false;
+				}
+				catch (std::invalid_argument&)
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+		return false;
 	}
 
-	template <typename T, typename U>
-	bool operator!=(const Graph<T, U>& graph1, const Graph<T, U>& graph2)
+	template <typename T1, typename U1>
+	bool operator!=(const Graph<T1, U1>& graph1, const Graph<T1, U1>& graph2)
 	{
 		return !operator==(graph1, graph2);
 	}

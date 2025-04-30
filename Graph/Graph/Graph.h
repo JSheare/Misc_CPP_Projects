@@ -20,6 +20,8 @@ namespace JML
 		~Graph();
 		Graph<T, U>& operator=(const Graph<T, U>& graph);  // Copy assignment
 		Graph<T, U>& operator=(Graph<T, U>&& graph) noexcept;  // Move assignment
+		template <typename T1, typename U1> friend bool operator==(const Graph<T1, U1>& graph1, const Graph<T1, U1>& graph2);
+		template <typename T1, typename U1> friend bool operator!=(const Graph<T1, U1>& graph1, const Graph<T1, U1>& graph2);
 		U& operator[](const T& key);
 		const U& operator[](const T& key) const;
 		bool empty() const;
@@ -32,7 +34,7 @@ namespace JML
 		bool adjacent(const T& key1, const T& key2) const;
 		const HashTable<T, int>& getAdjacent(const T& key) const;
 		int getWeight(const T& key1, const T& key2) const;
-		void addEdge(const T& key1, const T& key2, int weight=1);
+		void addEdge(const T& key1, const T& key2, int weight=0);
 		void removeEdge(const T& key1, const T& key2);
 		void clear();
 
