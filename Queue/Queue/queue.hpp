@@ -20,6 +20,18 @@ namespace JML
 		}
 	}
 
+	template <typename T1>
+	bool operator==(const Queue<T1>& queue1, const Queue<T1>& queue2)
+	{
+		return queue1.deque == queue2.deque;
+	}
+
+	template <typename T1>
+	bool operator!=(const Queue<T1>& queue1, const Queue<T1>& queue2)
+	{
+		return !operator!=(queue1, queue2);
+	}
+
 	template <typename T>
 	std::size_t Queue<T>::size() const
 	{

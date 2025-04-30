@@ -15,6 +15,8 @@ namespace JML
 	public:
 		Queue();
 		Queue(std::initializer_list<T> list);
+		template <typename T1> friend bool operator==(const Queue<T1>& queue1, const Queue<T1>& queue2);
+		template <typename T1> friend bool operator!=(const Queue<T1>& queue1, const Queue<T1>& queue2);
 		std::size_t size() const;
 		bool empty() const;
 		template <typename U> void push(U&& data);
