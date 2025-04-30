@@ -18,6 +18,8 @@ namespace JML
 		~Heap();
 		Heap<T, comparator>& operator=(const Heap<T, comparator>& heap);  // Copy assignment
 		Heap<T, comparator>& operator=(Heap<T, comparator>&& heap);  // Move assignment
+		template <typename T1, bool (*comparator)(const T1&, const T1&)> friend bool operator==(const Heap<T1, comparator>& heap1, const Heap <T1, comparator>& heap2);
+		template <typename T1, bool (*comparator)(const T1&, const T1&)> friend bool operator!=(const Heap<T1, comparator>& heap1, const Heap <T1, comparator>& heap2);
 		std::size_t size() const;
 		bool empty() const;
 		template <typename U> void insert(U&& item);

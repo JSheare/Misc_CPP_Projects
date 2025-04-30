@@ -80,6 +80,27 @@ namespace JML
 		return *this;
 	}
 
+	template <typename T1, bool (*comparator)(const T1&, const T1&)> 
+	bool operator==(const Heap<T1, comparator>& heap1, const Heap <T1, comparator>& heap2)
+	{
+		if (heap1.heapSize == heap2.heapSize)
+		{
+			for (std::size_t i{ 0 }; i < heap1.heapSize; ++i)
+			{
+				if (heap1.items[i] != heap2.items[i])
+					return false;
+			}
+			return true;
+		}
+		return false;
+	}
+
+	template <typename T1, bool (*comparator)(const T1&, const T1&)>
+	bool operator!=(const Heap<T1, comparator>& heap1, const Heap <T1, comparator>& heap2)
+	{
+		return !operator==(heap1, heap2);
+	}
+
 	// Returns the number of items in the heap
 	template <typename T, bool (*comparator)(const T&, const T&)>
 	std::size_t Heap<T, comparator>::size() const
