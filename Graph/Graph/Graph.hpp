@@ -74,6 +74,18 @@ namespace JML
 	}
 
 	template <typename T, typename U>
+	bool operator==(const Graph<T, U>& graph1, const Graph<T, U>& graph2)
+	{
+
+	}
+
+	template <typename T, typename U>
+	bool operator!=(const Graph<T, U>& graph1, const Graph<T, U>& graph2)
+	{
+		return !operator==(graph1, graph2);
+	}
+
+	template <typename T, typename U>
 	U& Graph<T, U>::operator[](const T& key)
 	{
 		return getVertex(key);

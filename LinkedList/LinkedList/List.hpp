@@ -118,25 +118,28 @@ namespace JML
 		return get(index);
 	}
 
-	template <typename T>
-	bool operator==(const List<T>& list1, const List<T>& list2)
+	template <typename T1>
+	bool operator==(const List<T1>& list1, const List<T1>& list2)
 	{
 		if (list1.length == list2.length)
 		{
-			typename List<T>::ListLink* oneCurr{ list1.head };
-			typename List<T>::ListLink* twoCurr{ list2.head };
+			typename List<T1>::ListLink* oneCurr{ list1.head };
+			typename List<T1>::ListLink* twoCurr{ list2.head };
 			while (oneCurr)
 			{
 				if (oneCurr->data != twoCurr->data)
 					return false;
+
+				oneCurr = oneCurr->next;
+				twoCurr = twoCurr->next;
 			}
 			return true;
 		}
 		return false;
 	}
 
-	template <typename T>
-	bool operator!=(const List<T>& list1, const List<T>& list2)
+	template <typename T1>
+	bool operator!=(const List<T1>& list1, const List<T1>& list2)
 	{
 		return !(operator==(list1, list2));
 	}

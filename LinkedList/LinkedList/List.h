@@ -25,8 +25,8 @@ namespace JML
 		List<T>& operator=(List<T>&& list) noexcept;  // Move assignment
 		T& operator[](std::size_t index);
 		const T& operator[](std::size_t index) const;
-		friend bool operator==(const List<T>& list1, const List<T>& list2);
-		friend bool operator!=(const List<T>& list1, const List<T>& list2);
+		template <typename T1> friend bool operator==(const List<T1>& list1, const List<T1>& list2);
+		template <typename T1> friend bool operator!=(const List<T1>& list1, const List<T1>& list2);
 		template <typename T1> friend std::ostream& operator<<(std::ostream& out, const List<T1>& list);
 		bool empty() const;
 		std::size_t size() const;
