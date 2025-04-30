@@ -138,6 +138,34 @@ namespace JML
 		return *this;
 	}
 
+	template <typename T1, typename U1>
+	bool operator==(const HashTable<T1, U1>& table1, const HashTable<T1, U1>& table2)
+	{
+		if (table1.numPairs == table2.numPairs)
+		{
+			for (const T1& key : table1)
+			{
+				try
+				{
+					if (table1.getBucketLink(key)->value != table2.getBucketLink(key)->value)
+						return false;
+				}
+				catch (std::invalid_argument&)
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+
+	template <typename T1, typename U1>
+	bool operator!=(const HashTable<T1, U1>& table1, const HashTable<T1, U1>& table2)
+	{
+		return operator==(table1, table2);
+	}
+
 	template <typename T, typename U>
 	template <typename V> U& HashTable<T, U>::operator[](V&& key)
 	{

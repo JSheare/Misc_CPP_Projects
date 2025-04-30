@@ -20,6 +20,8 @@ namespace JML
 		~HashTable();
 		HashTable<T, U>& operator=(const HashTable<T, U>& table);  // Copy assignment
 		HashTable<T, U>& operator=(HashTable<T, U>&& table) noexcept;  // Move assignment
+		template <typename T1, typename U1> friend bool operator==(const HashTable<T1, U1>& table1, const HashTable<T1, U1>& table2);
+		template <typename T1, typename U1> friend bool operator!=(const HashTable<T1, U1>& table1, const HashTable<T1, U1>& table2);
 		template <typename V> U& operator[](V&& key);
 		const U& operator[](const T& key) const;
 		bool empty() const;
