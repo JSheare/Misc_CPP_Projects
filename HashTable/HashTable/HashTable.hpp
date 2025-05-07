@@ -8,9 +8,17 @@
 namespace JML
 {
 	template <typename T, typename U>
-	HashTable<T, U>::HashTable(std::size_t numBuckets) :
-		buckets{ new BucketLink*[numBuckets] }, numBuckets{ numBuckets }
+	HashTable<T, U>::HashTable(std::size_t reserveCount, float maxLoad) :
+		maxLoad{maxLoad}
 	{
+		float bucketsReq{ static_cast<float>(reserveCount) / maxLoad };
+		std::size_t bucketsReqI{ static_cast<std::size_t>(bucketsReq) };
+		if (bucketsReq == static_cast<float>(bucketsReqI))
+			numBuckets = bucketsReqI;
+		else
+			numBuckets = bucketsReqI + 1;
+
+		buckets = new BucketLink*[numBuckets];
 		for (std::size_t i{ 0 }; i < numBuckets; ++i)
 		{
 			buckets[i] = nullptr;
@@ -332,9 +340,9 @@ namespace JML
 
 	// Sets the current maximum load factor
 	template <typename T, typename U>
-	void HashTable<T, U>::maxLoadFactor(float max)
+	void HashTable<T, U>::maxLoadFactor(float newMax)
 	{
-		maxLoad = max;
+		maxLoad = newMax;
 	}
 
 	// Reserves the number of buckets needed to store at least count key-value pairs (without exceeding the maximum load factor) and rehashes
@@ -342,7 +350,7 @@ namespace JML
 	void HashTable<T, U>::reserve(std::size_t count)
 	{
 		// Rehashing to the ceiling of this division operation
-		float bucketsReq{ static_cast<float>(count) / maxLoadFactor() };
+		float bucketsReq{ static_cast<float>(count) / maxLoad };
 		std::size_t bucketsReqI{ static_cast<std::size_t>(bucketsReq) };
 		if (bucketsReq == static_cast<float>(bucketsReqI))
 			rehash(bucketsReqI);
@@ -360,38 +368,41 @@ namespace JML
 		{
 			numBuckets *= 2;
 		}
-		buckets = new BucketLink * [numBuckets];
-		for (std::size_t i{ 0 }; i < numBuckets; ++i)
+		if (numBuckets > oldNumBuckets)
 		{
-			buckets[i] = nullptr;
-		}
-		for (std::size_t i{ 0 }; i < oldNumBuckets; ++i)
-		{
-			if (oldBuckets[i])
+			buckets = new BucketLink*[numBuckets];
+			for (std::size_t i{ 0 }; i < numBuckets; ++i)
 			{
-				BucketLink* curr{ oldBuckets[i] };
-				BucketLink* next{ nullptr };
-				while (curr)
+				buckets[i] = nullptr;
+			}
+			for (std::size_t i{ 0 }; i < oldNumBuckets; ++i)
+			{
+				if (oldBuckets[i])
 				{
-					next = curr->next;
-					curr->next = nullptr;
-					std::size_t index{ bucket(curr->key) };
-					if (!buckets[index])
-						buckets[index] = curr;
-					else
+					BucketLink* curr{ oldBuckets[i] };
+					BucketLink* next{ nullptr };
+					while (curr)
 					{
-						BucketLink* curr1{ buckets[index] };
-						while (curr1->next)
+						next = curr->next;
+						curr->next = nullptr;
+						std::size_t index{ bucket(curr->key) };
+						if (!buckets[index])
+							buckets[index] = curr;
+						else
 						{
-							curr1 = curr1->next;
+							BucketLink* curr1{ buckets[index] };
+							while (curr1->next)
+							{
+								curr1 = curr1->next;
+							}
+							curr1->next = curr;
 						}
-						curr1->next = curr;
+						curr = next;
 					}
-					curr = next;
 				}
 			}
+			delete[] oldBuckets;
 		}
-		delete[] oldBuckets;
 	}
 
 	// Returns an iterator to the beginning of the hash table. Iterators return constant references to keys
@@ -413,7 +424,7 @@ namespace JML
 		return HTIter(buckets + numBuckets, nullptr, 0);
 	}
 
-	// Returns the link with the given key. Creates a new link if no link with the given key exists.  Supports perfect forwarding
+	// Returns the link with the given key. Creates a new link if no link with the given key exists. Supports perfect forwarding
 	template <typename T, typename U>
 	template <typename V> HashTable<T, U>::BucketLink* HashTable<T, U>::getBucketLink(V&& key)
 	{

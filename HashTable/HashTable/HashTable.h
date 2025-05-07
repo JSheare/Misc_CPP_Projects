@@ -14,7 +14,7 @@ namespace JML
 		class HTIter;
 
 	public:
-		HashTable(std::size_t numBuckets = 10);
+		HashTable(std::size_t reserveCount = 10, float maxLoad = 1.0);
 		HashTable(const HashTable<T, U>& table);  // Copy constructor
 		HashTable(HashTable<T, U>&& table) noexcept;  // Move constructor
 		~HashTable();
@@ -37,7 +37,7 @@ namespace JML
 		std::size_t bucketSize(std::size_t bucketIndex) const;
 		float loadFactor() const;
 		float maxLoadFactor() const;
-		void maxLoadFactor(float max);
+		void maxLoadFactor(float newMax);
 		void reserve(std::size_t count);
 		void rehash(std::size_t count = 1);
 		HTIter begin() const;
