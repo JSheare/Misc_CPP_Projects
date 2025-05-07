@@ -37,7 +37,7 @@ namespace JML
 		std::size_t getRight(std::size_t index) const;
 		void heapifyUp(std::size_t index);
 		void heapifyDown(std::size_t index);
-		void swap(std::size_t index1, std::size_t index2);
+		void swapIndices(std::size_t index1, std::size_t index2);
 		void resize();
 	};
 }

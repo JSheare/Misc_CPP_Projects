@@ -192,7 +192,7 @@ namespace JML
 			std::size_t parentIndex{ getParent(index) };
 			if (comparator(items[index], items[parentIndex]))
 			{
-				swap(index, parentIndex);
+				swapIndices(index, parentIndex);
 				index = parentIndex;
 			}
 			else
@@ -217,7 +217,7 @@ namespace JML
 
 			if (smallest != index)
 			{
-				swap(index, smallest);
+				swapIndices(index, smallest);
 				index = smallest;
 				continue;
 			}
@@ -227,11 +227,11 @@ namespace JML
 
 	// Swaps the items at the given indices
 	template <typename T, bool (*comparator)(const T&, const T&)>
-	void Heap<T, comparator>::swap(std::size_t index1, std::size_t index2)
+	void Heap<T, comparator>::swapIndices(std::size_t index1, std::size_t index2)
 	{
-		T temp{ items[index1] };
-		items[index1] = items[index2];
-		items[index2] = temp;
+		T temp{ static_cast<T&&>(items[index1]) };
+		items[index1] = static_cast<T&&>(items[index2]);
+		items[index2] = static_cast<T&&>(temp);
 	}
 
 	// Resizes the heap to 2x its current size
