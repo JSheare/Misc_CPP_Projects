@@ -13,8 +13,8 @@ namespace JML
 	}
 
 	template <typename T, bool (*comparator)(const T&, const T&)>
-	Heap<T, comparator>::Heap(std::size_t capacity) :
-		capacity{capacity}, items{new T[capacity]}
+	Heap<T, comparator>::Heap(std::size_t reserveNum) :
+		capacity{reserveNum}, items{new T[reserveNum]}
 	{}
 
 	// Copy constructor
@@ -119,8 +119,9 @@ namespace JML
 	template <typename T, bool (*comparator)(const T&, const T&)>
 	template <typename U> void Heap<T, comparator>::insert(U&& item)
 	{
+		// Growing the heap by a factor of two if the maximum capacity has been reached
 		if (heapSize == capacity)
-			resize();
+			reserve(2 * capacity);
 		
 		items[heapSize] = static_cast<U&&>(item);
 		heapifyUp(heapSize++);
@@ -159,6 +160,23 @@ namespace JML
 			items[0] = items[heapSize - 1];
 			--heapSize;
 			heapifyDown(0);
+		}
+	}
+
+	// Reserves at least reserveNum elements
+	template <typename T, bool (*comparator)(const T&, const T&)>
+	void Heap<T, comparator>::reserve(std::size_t reserveNum)
+	{
+		if (reserveNum > capacity)
+		{
+			capacity = reserveNum;
+			T* newItems{ new T[capacity] };
+			for (std::size_t i{ 0 }; i < heapSize; ++i)
+			{
+				newItems[i] = items[i];
+			}
+			delete[] items;
+			items = newItems;
 		}
 	}
 
@@ -232,20 +250,6 @@ namespace JML
 		T temp{ static_cast<T&&>(items[index1]) };
 		items[index1] = static_cast<T&&>(items[index2]);
 		items[index2] = static_cast<T&&>(temp);
-	}
-
-	// Resizes the heap to 2x its current size
-	template <typename T, bool (*comparator)(const T&, const T&)>
-	void Heap<T, comparator>::resize()
-	{
-		capacity *= 2;
-		T* newItems{ new T[capacity] };
-		for (std::size_t i{ 0 }; i < heapSize; ++i)
-		{
-			newItems[i] = items[i];
-		}
-		delete[] items;
-		items = newItems;
 	}
 }
 #endif

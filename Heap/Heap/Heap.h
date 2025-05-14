@@ -12,7 +12,7 @@ namespace JML
 	class Heap
 	{
 	public:
-		Heap(std::size_t capacity = 10);
+		Heap(std::size_t reserveNum = 10);
 		Heap(const Heap<T, comparator>& heap);  // Copy constructor
 		Heap(Heap<T, comparator>&& heap) noexcept;  // Move constructor
 		~Heap();
@@ -26,6 +26,7 @@ namespace JML
 		T& top();
 		const T& top() const;
 		void pop();
+		void reserve(std::size_t reserveNum = 1);
 
 	private:
 		std::size_t capacity{};
@@ -38,7 +39,6 @@ namespace JML
 		void heapifyUp(std::size_t index);
 		void heapifyDown(std::size_t index);
 		void swapIndices(std::size_t index1, std::size_t index2);
-		void resize();
 	};
 }
 #include "Heap.hpp"
