@@ -41,12 +41,12 @@ namespace JML
 		std::size_t startIndex{ 0 };
 		std::size_t endIndex{ 0 };
 
-		void resize(bool resizeFront = true);
+		void resize();
 		void incrementStart();
 		void decrementStart();
-		void incrementEnd();
-		void decrementEnd();
-
+		void incrementBack();
+		void decrementBack();
+		bool slide(bool left);
 	};
 }
 #include "Deque.hpp"

@@ -10,14 +10,14 @@ namespace JML
 	template <typename T>
 	Deque<T>::Deque()
 	{
-		mapSize = 8;
+		mapSize = 3;
 		map = new T*[mapSize];
 		for (std::size_t i{ 0 }; i < mapSize; ++i)
 		{
 			map[i] = nullptr;
 		}
-		//  Starting towards the middle to prevent early resizings
-		frontBlock = backBlock = 3;
+		//  Starting at the middle to prevent early resizings
+		frontBlock = backBlock = mapSize / 2;
 		map[frontBlock] = new T[BLOCKSIZE];
 	}
 
@@ -37,7 +37,7 @@ namespace JML
 		mapSize{deque.mapSize}, frontBlock{deque.frontBlock}, backBlock{deque.backBlock}, 
 		numItems{deque.numItems}, startIndex{deque.numItems}, endIndex{deque.endIndex}
 	{
-		map = new T*[deque.mapSize];
+		map = new T*[mapSize];
 		for (std::size_t i{ 0 }; i < mapSize; ++i)
 		{
 			if (deque.map[i])
@@ -56,18 +56,18 @@ namespace JML
 	// Move constructor
 	template <typename T>
 	Deque<T>::Deque(Deque<T>&& deque) noexcept :
-		mapSize{ deque.mapSize }, frontBlock{ deque.frontBlock }, backBlock{ deque.backBlock },
-		numItems{ deque.numItems }, startIndex{ deque.numItems }, endIndex{ deque.endIndex }, 
-		map{deque.map}
+		map{deque.map}, mapSize{deque.mapSize}, frontBlock{deque.frontBlock}, 
+		backBlock {deque.backBlock}, numItems{deque.numItems}, 
+		startIndex{deque.startIndex}, endIndex{deque.endIndex}
 	{
 		// Allocating exactly one block so that the old deque is still valid after the move
+		deque.map = new T*[1];
 		deque.mapSize = 1;
 		deque.frontBlock = 0;
 		deque.backBlock = 0;
 		deque.numItems = 0;
 		deque.startIndex = 0;
 		deque.endIndex = 0;
-		deque.map = new T*[1];
 		deque.map[0] = new T[BLOCKSIZE];
 	}
 
@@ -94,13 +94,13 @@ namespace JML
 		}
 		delete[] map;
 
+		map = new T*[deque.mapSize];
 		mapSize = deque.mapSize;
 		frontBlock = deque.frontBlock;
 		backBlock = deque.backBlock;
 		numItems = deque.numItems;
 		startIndex = deque.numItems;
 		endIndex = deque.endIndex;
-		map = new T*[deque.mapSize];
 		for (std::size_t i{ 0 }; i < mapSize; ++i)
 		{
 			if (deque.map[i])
@@ -127,22 +127,21 @@ namespace JML
 		}
 		delete[] map;
 		
+		map = deque.map;
 		mapSize = deque.mapSize;
 		frontBlock = deque.frontBlock;
 		backBlock = deque.backBlock;
 		numItems = deque.numItems;
 		startIndex = deque.numItems;
 		endIndex = deque.endIndex;
-		map = deque.map;
 
 		// Allocating exactly one block so that the old deque is still valid after the move
+		deque.map = new T*[1];
 		deque.mapSize = 1;
 		deque.frontBlock = 0;
-		deque.backBlock = 0;
 		deque.numItems = 0;
 		deque.startIndex = 0;
 		deque.endIndex = 0;
-		deque.map = new T*[1];
 		deque.map[0] = new T[BLOCKSIZE];
 
 		return *this;
@@ -153,11 +152,12 @@ namespace JML
 	{
 		if (deque1.numItems == deque2.numItems)
 		{
+			std::size_t itemsLeft{ deque1.numItems };
 			std::size_t block1{ deque1.frontBlock };
 			std::size_t block2{ deque2.frontBlock };
 			std::size_t index1{ deque1.startIndex };
 			std::size_t index2{ deque2.startIndex };
-			while (true)
+			while (itemsLeft)
 			{
 				if (deque1.map[block1][index1] != deque2.map[block2][index2])
 					return false;
@@ -174,8 +174,7 @@ namespace JML
 					++block2;
 					index2 = 0;
 				}
-				if ((block1 == deque1.backBlock && index1 > deque1.endIndex) || (block1 > deque1.backBlock))
-					break;
+				--itemsLeft;
 			}
 			return true;
 		}
@@ -210,7 +209,7 @@ namespace JML
 		++numItems;
 		decrementStart();
 		if (numItems == 1)
-			incrementEnd();
+			incrementBack();
 	}
 
 	// Pushes the given item to the back of the deque. Supports perfect forwarding
@@ -219,7 +218,7 @@ namespace JML
 	{
 		map[backBlock][endIndex] = static_cast<U&&>(item);
 		++numItems;
-		incrementEnd();
+		incrementBack();
 		if (numItems == 1)
 			decrementStart();
 	}
@@ -283,6 +282,8 @@ namespace JML
 
 		--numItems;
 		incrementStart();
+		if (numItems == 0)
+			decrementBack();
 	}
 
 	// Removes hte item at the back of the deque. Throws std::out_of_range if the deque is empty
@@ -293,39 +294,24 @@ namespace JML
 			throw std::out_of_range("no items to pop");
 
 		--numItems;
-		decrementEnd();
+		decrementBack();
+		if (numItems == 0)
+			incrementStart();
 	}
 
-	// Resizes the queue to 2x its current size, with a bias toward the front if the given argument is true, and the back otherwise
+	// Resizes the deque to 2x its current size
 	template <typename T>
-	void Deque<T>::resize(bool resizeFront)
+	void Deque<T>::resize()
 	{
 		std::size_t newMapSize{ mapSize * 2 };
 		T** newMap{ new T*[newMapSize] };
-		if (resizeFront)
+		for (std::size_t i{ 0 }; i < mapSize; ++i)
 		{
-			std::size_t divider{ newMapSize - mapSize };
-			for (std::size_t i{ 0 }; i < divider; ++i)
-			{
-				newMap[i] = nullptr;
-			}
-			for (std::size_t i{ divider }; i < newMapSize; ++i)
-			{
-				newMap[i] = map[i - divider];
-			}
-			frontBlock += divider;
-			backBlock += divider;
+			newMap[i] = map[i];
 		}
-		else
+		for (std::size_t i{ mapSize }; i < newMapSize; ++i)
 		{
-			for (std::size_t i{ 0 }; i < mapSize; ++i)
-			{
-				newMap[i] = map[i];
-			}
-			for (std::size_t i{ mapSize }; i < newMapSize; ++i)
-			{
-				newMap[i] = nullptr;
-			}
+			newMap[i] = nullptr;
 		}
 		delete[] map;
 		map = newMap;
@@ -341,6 +327,12 @@ namespace JML
 		{
 			++frontBlock;
 			startIndex = 0;
+			// Leaving a maximum of one spare block at the front
+			if (frontBlock >= 2)
+			{
+				delete[] map[frontBlock - 2];
+				map[frontBlock - 2] = nullptr;
+			}
 		}
 	}
 
@@ -352,12 +344,28 @@ namespace JML
 			--startIndex;
 		else
 		{
+			// Attempting to slide everything to the right. Resizing if that isn't possible
 			if (frontBlock == 0)
-				resize(true);
-
+			{
+				bool success{ slide(false) };
+				if (!success)
+				{
+					resize();
+					slide(false);  // Doing a slide to make a one block space before the front
+				}
+			}
 			if (!map[frontBlock - 1])
-				map[frontBlock - 1] = new T[BLOCKSIZE];
-
+			{
+				// Using the spare from the back if it exists
+				if (backBlock + 1 < mapSize && map[backBlock + 1])
+				{
+					map[frontBlock - 1] = map[backBlock + 1];
+					map[backBlock + 1] = nullptr;
+				}
+				// Allocating a new block if it doesn't
+				else
+					map[frontBlock - 1] = new T[BLOCKSIZE];
+			}
 			--frontBlock;
 			startIndex = BLOCKSIZE - 1;
 		}
@@ -365,15 +373,26 @@ namespace JML
 
 	// Increments the pointer to the end of the deque by one
 	template <typename T>
-	void Deque<T>::incrementEnd()
+	void Deque<T>::incrementBack()
 	{
 		++endIndex;
 		if (endIndex == BLOCKSIZE)
 		{
+			// Attempting to slide everything to the left. Resizing if that isn't possible
 			if (backBlock == mapSize - 1)
-				resize(false);
-
-			if (!map[backBlock + 1])
+			{
+				bool success{ slide(true) };
+				if (!success)
+					resize();
+			}
+			// Using the spare from the front if it exists
+			if (frontBlock >= 1 && map[frontBlock - 1])
+			{
+				map[backBlock + 1] = map[frontBlock - 1];
+				map[frontBlock - 1] = nullptr;
+			}
+			// Allocating a new block if it doesn't
+			else
 				map[backBlock + 1] = new T[BLOCKSIZE];
 
 			++backBlock;
@@ -383,15 +402,72 @@ namespace JML
 
 	// Decrements the pointer to the end of the deque by one
 	template <typename T>
-	void Deque<T>::decrementEnd()
+	void Deque<T>::decrementBack()
 	{
-		if (endIndex == 0)
+		if (endIndex > 0)
+			--endIndex;
+		else
 		{
 			--backBlock;
 			endIndex = BLOCKSIZE - 1;
+			// Leaving a maximum of one spare block at the back
+			if (backBlock + 2 < mapSize)
+			{
+				delete[] map[backBlock + 2];
+				map[backBlock + 2] = nullptr;
+			}
+		}
+	}
+
+	// Attempts to slide all blocks to either the left or right depending on the given parameter. Returns true if successful and false otherwise
+	template <typename T>
+	bool Deque<T>::slide(bool left)
+	{
+		if (left)
+		{
+			std::size_t index{ frontBlock };
+			// Accounting for the spare block
+			if (index > 0 && map[index - 1])
+				--index;
+
+			if (index > 0)
+			{
+				while (map[index])
+				{
+					map[index - 1] = map[index];
+					++index;
+				}
+				map[index] = nullptr;
+				--frontBlock;
+				--backBlock;
+				return true;
+			}
+			return false;
 		}
 		else
-			--endIndex;
+		{
+			std::size_t index{ backBlock };
+			// Accounting for the spare block
+			if (index < mapSize - 1 && map[index + 1])
+				++index;
+
+			if (index < mapSize - 1)
+			{
+				while (map[index])
+				{
+					map[index + 1] = map[index];
+					if (index == 0)
+						break;
+					
+					--index;
+				}
+				map[index] = nullptr;
+				++frontBlock;
+				++backBlock;
+				return true;
+			}
+			return false;
+		}
 	}
 }
 #endif
