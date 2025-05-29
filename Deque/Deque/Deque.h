@@ -32,8 +32,8 @@ namespace JML
 
 	private:
 		static const std::size_t BLOCKSIZE{ 8 };
-		T** map{ nullptr };
 		std::size_t mapSize{ 0 };
+		T** map{ nullptr };
 		std::size_t frontBlock{ 0 };
 		std::size_t backBlock{ 0 };
 

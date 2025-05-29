@@ -8,16 +8,14 @@
 namespace JML
 {
 	template <typename T>
-	Deque<T>::Deque()
+	Deque<T>::Deque() :
+		mapSize{8}, map{new T*[mapSize]}, frontBlock{3},
+		backBlock{frontBlock}
 	{
-		mapSize = 3;
-		map = new T*[mapSize];
 		for (std::size_t i{ 0 }; i < mapSize; ++i)
 		{
 			map[i] = nullptr;
 		}
-		//  Starting at the middle to prevent early resizings
-		frontBlock = backBlock = mapSize / 2;
 		map[frontBlock] = new T[BLOCKSIZE];
 	}
 
@@ -34,10 +32,10 @@ namespace JML
 	// Copy constructor
 	template <typename T>
 	Deque<T>::Deque(const Deque<T>& deque) :
-		mapSize{deque.mapSize}, frontBlock{deque.frontBlock}, backBlock{deque.backBlock}, 
-		numItems{deque.numItems}, startIndex{deque.numItems}, endIndex{deque.endIndex}
+		mapSize {deque.mapSize}, map{new T*[deque.mapSize]}, frontBlock{deque.frontBlock},
+		backBlock{deque.backBlock}, numItems{deque.numItems}, startIndex{deque.startIndex}, 
+		endIndex{deque.endIndex}
 	{
-		map = new T*[mapSize];
 		for (std::size_t i{ 0 }; i < mapSize; ++i)
 		{
 			if (deque.map[i])
@@ -56,9 +54,9 @@ namespace JML
 	// Move constructor
 	template <typename T>
 	Deque<T>::Deque(Deque<T>&& deque) noexcept :
-		map{deque.map}, mapSize{deque.mapSize}, frontBlock{deque.frontBlock}, 
-		backBlock {deque.backBlock}, numItems{deque.numItems}, 
-		startIndex{deque.startIndex}, endIndex{deque.endIndex}
+		mapSize{deque.mapSize}, map{deque.map}, frontBlock{deque.frontBlock},
+		backBlock{deque.backBlock}, numItems{deque.numItems}, startIndex{deque.startIndex}, 
+		endIndex{deque.endIndex}
 	{
 		// Allocating exactly one block so that the old deque is still valid after the move
 		deque.map = new T*[1];
@@ -99,7 +97,7 @@ namespace JML
 		frontBlock = deque.frontBlock;
 		backBlock = deque.backBlock;
 		numItems = deque.numItems;
-		startIndex = deque.numItems;
+		startIndex = deque.startIndex;
 		endIndex = deque.endIndex;
 		for (std::size_t i{ 0 }; i < mapSize; ++i)
 		{
@@ -132,7 +130,7 @@ namespace JML
 		frontBlock = deque.frontBlock;
 		backBlock = deque.backBlock;
 		numItems = deque.numItems;
-		startIndex = deque.numItems;
+		startIndex = deque.startIndex;
 		endIndex = deque.endIndex;
 
 		// Allocating exactly one block so that the old deque is still valid after the move
@@ -286,7 +284,7 @@ namespace JML
 			decrementBack();
 	}
 
-	// Removes hte item at the back of the deque. Throws std::out_of_range if the deque is empty
+	// Removes the item at the back of the deque. Throws std::out_of_range if the deque is empty
 	template <typename T>
 	void Deque<T>::popBack()
 	{
@@ -432,12 +430,17 @@ namespace JML
 
 			if (index > 0)
 			{
-				while (map[index])
+				--index;
+				do
 				{
-					map[index - 1] = map[index];
 					++index;
-				}
-				map[index] = nullptr;
+					map[index - 1] = map[index];
+					if (index == mapSize - 1)
+					{
+						map[index] = nullptr;
+						break;
+					}
+				} while (map[index]);
 				--frontBlock;
 				--backBlock;
 				return true;
@@ -453,15 +456,18 @@ namespace JML
 
 			if (index < mapSize - 1)
 			{
-				while (map[index])
+				++index;
+				do
 				{
+					--index;
 					map[index + 1] = map[index];
 					if (index == 0)
+					{
+						map[index] = nullptr;
 						break;
-					
-					--index;
-				}
-				map[index] = nullptr;
+					}
+				} while (map[index]);
+
 				++frontBlock;
 				++backBlock;
 				return true;
