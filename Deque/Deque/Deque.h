@@ -9,6 +9,10 @@ namespace JML
 	template <typename T>
 	class Deque
 	{
+	private:
+		class Iterator;
+		class ConstIterator;
+
 	public:
 		Deque();
 		Deque(std::initializer_list<T> list);
@@ -29,9 +33,13 @@ namespace JML
 		const T& peekBack() const;
 		void popFront();
 		void popBack();
+		Iterator begin();
+		Iterator end();
+		ConstIterator begin() const;
+		ConstIterator end() const;
 
 	private:
-		static const std::size_t BLOCKSIZE{ 8 };
+		static constexpr std::size_t BLOCKSIZE{512/sizeof(T) ? 512/sizeof(T) : 1};
 		std::size_t mapSize{ 0 };
 		T** map{ nullptr };
 		std::size_t frontBlock{ 0 };
@@ -47,6 +55,26 @@ namespace JML
 		void incrementBack();
 		void decrementBack();
 		bool slide(bool left);
+
+		class Iterator
+		{
+		public:
+			Iterator(T** currentBlock, T* current);
+			T& operator*();
+			void operator++();
+			bool operator==(const Iterator& iterator) const;
+			bool operator!=(const Iterator& iterator) const;
+		protected:
+			T** currentBlock{ nullptr };
+			T* current{ nullptr };
+		};
+
+		class ConstIterator : Iterator
+		{
+		public:
+			ConstIterator(T** currentBlock, T* current);
+			const T& operator*();
+		};
 	};
 }
 #include "Deque.hpp"

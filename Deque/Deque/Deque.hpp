@@ -297,6 +297,44 @@ namespace JML
 			incrementStart();
 	}
 
+	// Returns an iterator to the beginning of the deque
+	template <typename T>
+	Deque<T>::Iterator Deque<T>::begin()
+	{
+		if (numItems == 0)
+			return end();
+		else if (startIndex != BLOCKSIZE - 1)
+			return Iterator(map + frontBlock, map[frontBlock] + startIndex + 1);
+		else
+			return Iterator(map + frontBlock + 1, map[frontBlock + 1]);
+	}
+
+	// Returns an iterator to the end of the deque
+	template <typename T>
+	Deque<T>::Iterator Deque<T>::end()
+	{
+		return Iterator(map + backBlock, map[backBlock] + endIndex);
+	}
+
+	// Returns a constant iterator to the beginning of the deque
+	template <typename T>
+	Deque<T>::ConstIterator Deque<T>::begin() const
+	{
+		if (numItems == 0)
+			return end();
+		else if (startIndex != BLOCKSIZE - 1)
+			return ConstIterator(map + frontBlock,*map[frontBlock] + startIndex + 1);
+		else
+			return ConstIterator(map + frontBlock + 1,*map[frontBlock + 1]);
+	}
+
+	// Returns a constant iterator to the end of the deque
+	template <typename T>
+	Deque<T>::ConstIterator Deque<T>::end() const
+	{
+		return ConstIterator(map + backBlock, map[backBlock] + endIndex);
+	}
+
 	// Resizes the deque to 2x its current size
 	template <typename T>
 	void Deque<T>::resize()
@@ -475,5 +513,55 @@ namespace JML
 			return false;
 		}
 	}
+
+	// Deque iterator implementation
+
+	template <typename T>
+	Deque<T>::Iterator::Iterator(T** currentBlock, T* current) :
+		currentBlock{currentBlock}, current{current}
+	{}
+
+	template <typename T>
+	T& Deque<T>::Iterator::operator*()
+	{
+		return *current;
+	}
+
+	template <typename T>
+	void Deque<T>::Iterator::operator++()
+	{
+		++current;
+		if (current - *currentBlock == BLOCKSIZE)
+		{
+			++currentBlock;
+			current = *currentBlock;
+		}
+	}
+
+	template <typename T>
+	bool Deque<T>::Iterator::operator==(const Iterator& iterator) const
+	{
+		return currentBlock == iterator.currentBlock && current == iterator.current;
+	}
+
+	template <typename T>
+	bool Deque<T>::Iterator::operator!=(const Iterator& iterator) const
+	{
+		return !operator==(iterator);
+	}
+
+	// Constant deque iterator implementation
+
+	template <typename T>
+	Deque<T>::ConstIterator::ConstIterator(T** currentBlock, T* current) :
+		Iterator::currentBlock{currentBlock}, Iterator::current{current}
+	{}
+
+	template <typename T>
+	const T& Deque<T>::ConstIterator::operator*()
+	{
+		return *Iterator::current;
+	}
+
 }
 #endif
