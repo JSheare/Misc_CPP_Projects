@@ -33,6 +33,7 @@ namespace JML
 		const T& peekBack() const;
 		void popFront();
 		void popBack();
+		void shrink_to_fit();
 		Iterator begin();
 		Iterator end();
 		ConstIterator begin() const;

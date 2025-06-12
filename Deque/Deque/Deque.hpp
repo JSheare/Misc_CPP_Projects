@@ -297,6 +297,76 @@ namespace JML
 			incrementStart();
 	}
 
+	// Shrinks the deque to the minimum map size and number of blocks necessary to hold all current items
+	template <typename T>
+	void Deque<T>::shrink_to_fit()
+	{
+		if (numItems > 0)
+		{
+			// 2 for the empty entries at start and end index
+			std::size_t newMapSize{ (numItems + 2) / BLOCKSIZE + ((numItems + 2) % BLOCKSIZE > 0 ? 1 : 0) };
+			T** newMap{ new T * [newMapSize] };
+			std::size_t oldBlock{ frontBlock };
+			std::size_t oldIndex{ startIndex + 1 };
+			if (oldIndex == BLOCKSIZE)
+			{
+				oldBlock = frontBlock + 1;
+				oldIndex = 0;
+			}
+			std::size_t newBlock{ 0 };
+			std::size_t newIndex{ 1 };  // Leaving one empty for start index
+			std::size_t count{ numItems };
+			while (newBlock < newMapSize)
+			{
+				newMap[newBlock] = new T[BLOCKSIZE];
+				while (newIndex < BLOCKSIZE)
+				{
+					// Leaving one empty for end index
+					if (count == 0)
+					{
+						backBlock = newBlock;
+						endIndex = newIndex;
+						break;
+					}
+					newMap[newBlock][newIndex] = map[oldBlock][oldIndex];
+					--count;
+					++oldIndex;
+					++newIndex;
+					if (oldIndex == BLOCKSIZE)
+					{
+						oldIndex = 0;
+						++oldBlock;
+					}
+				}
+				newIndex = 0;
+				++newBlock;
+			}
+			frontBlock = startIndex = 0;
+			for (std::size_t i{ 0 }; i < mapSize; ++i)
+			{
+				delete[] map[i];
+			}
+			delete[] map;
+			map = newMap;
+			mapSize = newMapSize;
+		}
+		else
+		{
+			T** newMap{ new T*[1] };
+			newMap[0] = map[frontBlock];
+			map[frontBlock] = nullptr;
+			frontBlock = backBlock = startIndex = endIndex = 0;
+			for (std::size_t i{ 0 }; i < mapSize; ++i)
+			{
+				delete[] map[i];
+			}
+			delete[] map;
+			map = newMap;
+			mapSize = 1;
+		}
+
+	}
+
 	// Returns an iterator to the beginning of the deque
 	template <typename T>
 	Deque<T>::Iterator Deque<T>::begin()

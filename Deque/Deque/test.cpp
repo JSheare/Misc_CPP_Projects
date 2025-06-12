@@ -14,6 +14,8 @@ int main()
 
     std::cout << '\n';
 
+    deque.shrink_to_fit();
+
     while (!deque.empty())
     {
         std::cout << "Popping from the back: " << deque.peekBack() << '\n';
@@ -21,6 +23,8 @@ int main()
     }
 
     std::cout << '\n';
+
+    deque.shrink_to_fit();
 
     for (int i{ 0 }; i < range; ++i)
     {
