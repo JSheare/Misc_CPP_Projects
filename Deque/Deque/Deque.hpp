@@ -146,6 +146,18 @@ namespace JML
 	}
 
 	template <typename T>
+	T& Deque<T>::operator[](std::size_t index)
+	{
+		return peek(index);
+	}
+
+	template <typename T>
+	const T& Deque<T>::operator[](std::size_t index) const
+	{
+		return peek(index);
+	}
+
+	template <typename T>
 	bool operator==(const Deque<T>& deque1, const Deque<T>& deque2)
 	{
 		if (deque1.numItems == deque2.numItems)
@@ -199,6 +211,27 @@ namespace JML
 		return numItems == 0;
 	}
 
+	// Clears all items from the queue
+	template <typename T>
+	void Deque<T>::clear()
+	{
+		std::size_t middle{ mapSize/2 };
+		if (middle > 0)
+		{
+			while (frontBlock < middle - 1)
+			{
+				delete map[frontBlock];
+				map[frontBlock++] = nullptr;
+			}
+			while (backBlock > middle + 1)
+			{
+				delete map[backBlock];
+				map[backBlock--] = nullptr;
+			}
+		}
+		startIndex = endIndex = numItems = 0;
+	}
+
 	// Pushes the given item to the front of the deque. Supports perfect forwarding
 	template <typename T>
 	template <typename U> void Deque<T>::pushFront(U&& item)
@@ -219,6 +252,39 @@ namespace JML
 		incrementBack();
 		if (numItems == 1)
 			decrementStart();
+	}
+
+	// Inserts the given item at the given index. Supports perfect forwarding
+	template <typename T>
+	template <typename U> void Deque<T>::insert(std::size_t index, U&& item)
+	{
+		if (index >= numItems)
+			pushBack(item);
+		else if (index <= 0)
+			pushFront(item);
+		else
+		{
+			std::size_t copyBlock{ backBlock };
+			std::size_t copyIndex{ endIndex };
+			std::size_t newBlock{ getBlock(index + 1) };
+			std::size_t newIndex{ getIndex(index + 1) };
+			incrementBack();
+			while (true)
+			{
+				if (copyBlock == newBlock && copyIndex == newIndex)
+					break;
+
+				map[copyBlock][copyIndex] = static_cast<T&&>((copyIndex != 0 ? map[copyBlock][copyIndex - 1] : map[copyBlock - 1][BLOCKSIZE - 1]));
+				--copyIndex;
+				if (copyIndex == 0)
+				{
+					--copyBlock;
+					copyIndex = BLOCKSIZE - 1;
+				}
+			}
+			map[newBlock][newIndex] = static_cast<U&&>(item);
+			++numItems;
+		}
 	}
 
 	// Returns a reference to the item at the front of the deque. Throws std::out_of_range if the deque is empty
@@ -271,6 +337,27 @@ namespace JML
 			return map[backBlock][endIndex - 1];
 	}
 
+	// Returns a reference to the item at the specified index. Throws std::out_of_range if the deque is empty
+	template <typename T>
+	T& Deque<T>::peek(std::size_t index)
+	{
+		if (index >= numItems || index < 0)
+			throw std::out_of_range("index out of range");
+
+		// +1 to account for the reserved empty slot at startIndex
+		return map[getBlock(index + 1)][getIndex(index + 1)];
+	}
+
+	template <typename T>
+	const T& Deque<T>::peek(std::size_t index) const
+	{
+		if (index >= numItems || index < 0)
+			throw std::out_of_range("index out of range");
+
+		// +1 to account for the reserved empty slot at startIndex
+		return map[getBlock(index + 1)][getIndex(index + 1)];
+	}
+
 	// Removes the item at the front of the deque. Throws std::out_of_range if the deque is empty
 	template <typename T>
 	void Deque<T>::popFront()
@@ -295,6 +382,38 @@ namespace JML
 		decrementBack();
 		if (numItems == 0)
 			incrementStart();
+	}
+
+	// Removes the item at the given index. Throws std::out_of_range if the deque is empty
+	template <typename T>
+	void Deque<T>::remove(std::size_t index)
+	{
+		if (index >= numItems || index < 0)
+			return;
+		else if (numItems == 0)
+			throw std::out_of_range("no items to pop");
+		else
+		{
+			std::size_t copyBlock{ getBlock(index + 1) };
+			std::size_t copyIndex{ getIndex(index + 1) };
+			while (true)
+			{
+				if (copyBlock == backBlock && copyIndex == endIndex)
+					break;
+
+				map[copyBlock][copyIndex] = static_cast<T&&>(copyIndex == BLOCKSIZE - 1 ? map[copyBlock + 1][0] : map[copyBlock][copyIndex + 1]);
+				++copyIndex;
+				if (copyIndex == BLOCKSIZE)
+				{
+					++copyBlock;
+					copyIndex = 0;
+				}
+			}
+			decrementBack();
+			--numItems;
+			if (numItems == 0)
+				incrementStart();
+		}
 	}
 
 	// Shrinks the deque to the minimum map size and number of blocks necessary to hold all current items
@@ -403,6 +522,21 @@ namespace JML
 	Deque<T>::ConstIterator Deque<T>::end() const
 	{
 		return ConstIterator(map + backBlock, map[backBlock] + endIndex);
+	}
+
+	// Returns the block of the item at the specified offset from startIndex
+	template <typename T>
+	std::size_t Deque<T>::getBlock(std::size_t offset)
+	{
+		return frontBlock + (startIndex + offset) / BLOCKSIZE;
+	}
+
+	// Returns the index of the item at the specified offset from startIndex
+	template <typename T>
+	std::size_t Deque<T>::getIndex(std::size_t offset)
+	{
+		std::size_t remainder{ BLOCKSIZE - startIndex };
+		return remainder > offset ? startIndex + offset : (offset - remainder) % BLOCKSIZE;
 	}
 
 	// Resizes the deque to 2x its current size
@@ -632,6 +766,5 @@ namespace JML
 	{
 		return *Iterator::current;
 	}
-
 }
 #endif

@@ -21,18 +21,25 @@ namespace JML
 		~Deque();
 		Deque<T>& operator=(const Deque<T>& deque);  // Copy assignment
 		Deque<T>& operator=(Deque<T>&& deque) noexcept;  // Move assignment
+		T& operator[](std::size_t index);
+		const T& operator[](std::size_t index) const;
 		friend bool operator==(const Deque<T>& deque1, const Deque<T>& deque2);
 		friend bool operator!=(const Deque<T>& deque1, const Deque<T>& deque2);
 		std::size_t size() const;
 		bool empty() const;
+		void clear();
 		template <typename U> void pushFront(U&& item);
 		template <typename U> void pushBack(U&& item);
+		template <typename U> void insert(std::size_t index, U&& item);
 		T& peekFront();
 		const T& peekFront() const;
 		T& peekBack();
 		const T& peekBack() const;
+		T& peek(std::size_t index);
+		const T& peek(std::size_t index) const;
 		void popFront();
 		void popBack();
+		void remove(std::size_t index);
 		void shrink_to_fit();
 		Iterator begin();
 		Iterator end();
@@ -50,6 +57,8 @@ namespace JML
 		std::size_t startIndex{ 0 };
 		std::size_t endIndex{ 0 };
 
+		std::size_t getBlock(std::size_t offset);
+		std::size_t getIndex(std::size_t offset);
 		void resize();
 		void incrementStart();
 		void decrementStart();
