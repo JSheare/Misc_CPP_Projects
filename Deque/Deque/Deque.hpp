@@ -788,7 +788,7 @@ namespace JML
 	template <typename T>
 	const T& Deque<T>::ConstIterator::operator*()
 	{
-		return *Iterator::current;
+		return Iterator::operator*();
 	}
 }
 #endif
