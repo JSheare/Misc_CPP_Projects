@@ -72,6 +72,9 @@ namespace JML
 			Iterator(T** currentBlock, T* current);
 			T& operator*();
 			void operator++();
+			void operator++(int);
+			void operator--();
+			void operator--(int);
 			bool operator==(const Iterator& iterator) const;
 			bool operator!=(const Iterator& iterator) const;
 		protected:

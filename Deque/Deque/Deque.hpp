@@ -718,7 +718,7 @@ namespace JML
 		}
 	}
 
-	// Deque iterator implementation
+	// Deque bidirectional iterator implementation
 
 	template <typename T>
 	Deque<T>::Iterator::Iterator(T** currentBlock, T* current) :
@@ -740,6 +740,30 @@ namespace JML
 			++currentBlock;
 			current = *currentBlock;
 		}
+	}
+
+	template <typename T>
+	void Deque<T>::Iterator::operator++(int)
+	{
+		operator++();
+	}
+
+	template <typename T>
+	void Deque<T>::Iterator::operator--()
+	{
+		if (current == 0)
+		{
+			--currentBlock;
+			current = *currentBlock[BLOCKSIZE - 1];
+		}
+		else
+			--current;
+	}
+
+	template <typename T>
+	void Deque<T>::Iterator::operator--(int)
+	{
+		operator--();
 	}
 
 	template <typename T>
