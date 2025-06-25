@@ -11,7 +11,7 @@ namespace JML
 	{
 	private:
 		class BucketLink;
-		class HTIter;
+		class Iterator;
 
 	public:
 		HashTable(std::size_t reserveCount = 10, float maxLoad = 1.0);
@@ -40,8 +40,8 @@ namespace JML
 		void maxLoadFactor(float newMax);
 		void reserve(std::size_t count);
 		void rehash(std::size_t count = 1);
-		HTIter begin() const;
-		HTIter end() const;
+		Iterator begin() const;
+		Iterator end() const;
 		
 	private:
 		BucketLink** buckets{};
@@ -59,18 +59,20 @@ namespace JML
 			T key{};
 			U value{};
 			BucketLink* next{ nullptr };
+			BucketLink* prev{ nullptr };
 
 			BucketLink();
 		};
 
-		class HTIter
+		class Iterator
 		{
 		public:
-			HTIter(BucketLink** bucketHead, BucketLink* currentLink, std::size_t bucketsLeft);
+			Iterator(BucketLink** bucketHead, BucketLink* currentLink, std::size_t bucketsLeft);
 			const T& operator*();
 			void operator++();
-			bool operator==(const HTIter& iterator) const;
-			bool operator!=(const HTIter& iterator) const;
+			void operator++(int);
+			bool operator==(const Iterator& iterator) const;
+			bool operator!=(const Iterator& iterator) const;
 
 		protected:
 			BucketLink** bucketHead{ nullptr };

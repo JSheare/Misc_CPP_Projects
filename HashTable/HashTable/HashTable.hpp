@@ -407,21 +407,21 @@ namespace JML
 
 	// Returns an iterator to the beginning of the hash table. Iterators return constant references to keys
 	template <typename T, typename U>
-	HashTable<T, U>::HTIter HashTable<T, U>::begin() const
+	HashTable<T, U>::Iterator HashTable<T, U>::begin() const
 	{
 		for (std::size_t i{ 0 }; i < numBuckets; ++i)
 		{
 			if (buckets[i])
-				return HTIter(buckets + i, buckets[i], numBuckets - i);
+				return Iterator(buckets + i, buckets[i], numBuckets - i);
 		}
 		return end();
 	}
 
 	// Returns an iterator to one past the end of the hash table. Iterators return constant references to keys
 	template <typename T, typename U>
-	HashTable<T, U>::HTIter HashTable<T, U>::end() const
+	HashTable<T, U>::Iterator HashTable<T, U>::end() const
 	{
-		return HTIter(buckets + numBuckets, nullptr, 0);
+		return Iterator(buckets + numBuckets, nullptr, 0);
 	}
 
 	// Returns the link with the given key. Creates a new link if no link with the given key exists. Supports perfect forwarding
@@ -487,21 +487,21 @@ namespace JML
 	HashTable<T, U>::BucketLink::BucketLink()
 	{}
 
-	// Hash table iterator implementation
+	// Hash table forward iterator implementation
 
 	template <typename T, typename U>
-	HashTable<T, U>::HTIter::HTIter(BucketLink** bucketHead, BucketLink* currentLink, std::size_t bucketsLeft) :
+	HashTable<T, U>::Iterator::Iterator(BucketLink** bucketHead, BucketLink* currentLink, std::size_t bucketsLeft) :
 		bucketHead{bucketHead}, currentLink{currentLink}, bucketsLeft{bucketsLeft}
 	{}
 
 	template <typename T, typename U>
-	const T& HashTable<T, U>::HTIter::operator*()
+	const T& HashTable<T, U>::Iterator::operator*()
 	{
 		return currentLink->key;
 	}
 
 	template <typename T, typename U>
-	void HashTable<T, U>::HTIter::operator++()
+	void HashTable<T, U>::Iterator::operator++()
 	{
 		if (currentLink)
 			currentLink = currentLink->next;
@@ -525,13 +525,19 @@ namespace JML
 	}
 
 	template <typename T, typename U>
-	bool HashTable<T, U>::HTIter::operator==(const HTIter& iterator) const
+	void HashTable<T, U>::Iterator::operator++(int)
+	{
+		operator++();
+	}
+
+	template <typename T, typename U>
+	bool HashTable<T, U>::Iterator::operator==(const Iterator& iterator) const
 	{
 		return (bucketHead == iterator.bucketHead) && (currentLink == iterator.currentLink);
 	}
 
 	template <typename T, typename U>
-	bool HashTable<T, U>::HTIter::operator!=(const HTIter& iterator) const
+	bool HashTable<T, U>::Iterator::operator!=(const Iterator& iterator) const
 	{
 		return !operator==(iterator);
 	}
