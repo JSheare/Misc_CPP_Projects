@@ -12,8 +12,8 @@ namespace JML
 	{
 	private:
 		class ListLink;
-		class ListIter;
-		class ConstListIter;
+		class Iterator;
+		class ConstIterator;
 
 	public:
 		List();
@@ -48,10 +48,10 @@ namespace JML
 		List<T> slice(std::size_t start, std::size_t end) const;
 		void sort();
 		template <typename U> void sort(bool(*comparisonFcn)(U, U));  // Custom comparison function
-		ListIter begin();
-		ListIter end();
-		ConstListIter begin() const;
-		ConstListIter end() const;
+		Iterator begin();
+		Iterator end();
+		ConstIterator begin() const;
+		ConstIterator end() const;
 
 	private:
 		std::size_t length{ 0 };
@@ -74,22 +74,26 @@ namespace JML
 			ListLink(T&& data);
 		};
 
-		class ListIter
+		class Iterator
 		{
 		public:
-			ListIter(ListLink* nodePtr);
+			Iterator(ListLink* nodePtr);
 			T& operator*();
 			void operator++();
-			bool operator==(const ListIter& iterator) const;
-			bool operator!=(const ListIter& iterator) const;
+			void operator++(int);
+			void operator--();
+			void operator--(int);
+			bool operator==(const Iterator& iterator) const;
+			bool operator!=(const Iterator& iterator) const;
+
 		protected:
 			ListLink* nodePtr;
 		};
 
-		class ConstListIter : public ListIter
+		class ConstIterator : public Iterator
 		{
 		public:
-			ConstListIter(ListLink* nodePtr);
+			ConstIterator(ListLink* nodePtr);
 			const T& operator*();
 		};
 	};

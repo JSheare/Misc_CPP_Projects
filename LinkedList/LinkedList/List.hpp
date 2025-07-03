@@ -440,32 +440,32 @@ namespace JML
 
 	// Returns an iterator to the beginning of the list
 	template <typename T>
-	List<T>::ListIter List<T>::begin()
+	List<T>::Iterator List<T>::begin()
 	{
-		return ListIter{head};
+		return Iterator{head};
 	}
 
 	// Returns an iterator to one past the end of the list
 	template <typename T>
-	List<T>::ListIter List<T>::end()
+	List<T>::Iterator List<T>::end()
 	{
-		ListIter temp{ tail };
+		Iterator temp{ tail };
 		++temp;
 		return temp;
 	}
 
 	// Returns a constant iterator to the beginning of the list
 	template <typename T>
-	List<T>::ConstListIter List<T>::begin() const
+	List<T>::ConstIterator List<T>::begin() const
 	{
-		return ConstListIter{head};
+		return ConstIterator{head};
 	}
 
 	// Returns a constant iterator to one past the end of the list
 	template <typename T>
-	List<T>::ConstListIter List<T>::end() const
+	List<T>::ConstIterator List<T>::end() const
 	{
-		ConstListIter temp{ tail };
+		ConstIterator temp{ tail };
 		++temp;
 		return temp;
 	}
@@ -588,21 +588,21 @@ namespace JML
 		data{ data }
 	{}
 
-	// List iterator implementation
+	// List bidirectional iterator implementation
 
 	template <typename T>
-	List<T>::ListIter::ListIter(List<T>::ListLink* nodePtr) :
+	List<T>::Iterator::Iterator(List<T>::ListLink* nodePtr) :
 		nodePtr{nodePtr}
 	{}
 
 	template <typename T>
-	T& List<T>::ListIter::operator*()
+	T& List<T>::Iterator::operator*()
 	{
 		return nodePtr->data;
 	}
 
 	template <typename T>
-	void List<T>::ListIter::operator++()
+	void List<T>::Iterator::operator++()
 	{
 		if (nodePtr)
 		{
@@ -614,13 +614,37 @@ namespace JML
 	}
 
 	template <typename T>
-	bool List<T>::ListIter::operator==(const ListIter& iterator) const
+	void List<T>::Iterator::operator++(int)
+	{
+		operator++();
+	}
+
+	template <typename T>
+	void List<T>::Iterator::operator--()
+	{
+		if (nodePtr)
+		{
+			if (nodePtr->next)
+				nodePtr = nodePtr->next;
+			else
+				--nodePtr;
+		}
+	}
+
+	template <typename T>
+	void List<T>::Iterator::operator--(int)
+	{
+		operator--();
+	}
+
+	template <typename T>
+	bool List<T>::Iterator::operator==(const Iterator& iterator) const
 	{
 		return nodePtr == iterator.nodePtr;
 	}
 
 	template <typename T>
-	bool List<T>::ListIter::operator!=(const ListIter& iterator) const
+	bool List<T>::Iterator::operator!=(const Iterator& iterator) const
 	{
 		return !operator==(iterator);
 	}
@@ -628,14 +652,14 @@ namespace JML
 	// Constant list iterator implementation
 
 	template <typename T>
-	List<T>::ConstListIter::ConstListIter(List<T>::ListLink* nodePtr) :
-		ListIter::nodePtr{nodePtr}
+	List<T>::ConstIterator::ConstIterator(List<T>::ListLink* nodePtr) :
+		Iterator::nodePtr{nodePtr}
 	{}
 
 	template <typename T>
-	const T& List<T>::ConstListIter::operator*()
+	const T& List<T>::ConstIterator::operator*()
 	{
-		return ListIter::nodePtr->data;
+		return Iterator::nodePtr->data;
 	}
 }
 #endif
