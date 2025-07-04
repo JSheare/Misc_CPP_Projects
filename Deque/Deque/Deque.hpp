@@ -220,12 +220,12 @@ namespace JML
 		{
 			while (frontBlock < middle - 1)
 			{
-				delete map[frontBlock];
+				delete[] map[frontBlock];
 				map[frontBlock++] = nullptr;
 			}
 			while (backBlock > middle + 1)
 			{
-				delete map[backBlock];
+				delete[] map[backBlock];
 				map[backBlock--] = nullptr;
 			}
 		}
@@ -483,7 +483,6 @@ namespace JML
 			map = newMap;
 			mapSize = 1;
 		}
-
 	}
 
 	// Returns an iterator to the beginning of the deque
