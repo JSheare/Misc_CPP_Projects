@@ -36,8 +36,6 @@ namespace JML
 
 		std::size_t numItems{ 0 };
 		std::size_t topIndex{ 0 };  // Points to one past the top item
-
-		void resize();
 	};
 }
 #include "Stack.hpp"

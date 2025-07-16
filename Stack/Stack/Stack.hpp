@@ -201,7 +201,22 @@ namespace JML
 		if (topIndex == BLOCKSIZE)
 		{
 			if (topBlock == mapSize - 1)
-				resize();
+			{
+				// Resizing the stack to 2x its current size
+				std::size_t newMapSize{ mapSize * 2 };
+				T** newMap{ new T * [newMapSize] };
+				for (std::size_t i{ 0 }; i < mapSize; ++i)
+				{
+					newMap[i] = map[i];
+				}
+				for (std::size_t i{ mapSize }; i < newMapSize; ++i)
+				{
+					newMap[i] = nullptr;
+				}
+				delete[] map;
+				map = newMap;
+				mapSize = newMapSize;
+			}
 
 			if (!map[topBlock + 1])
 				map[topBlock + 1] = new T[BLOCKSIZE];
@@ -273,25 +288,6 @@ namespace JML
 		for (std::size_t i{ newMapSize }; i < mapSize; ++i)
 		{
 			delete[] map[i];
-		}
-		delete[] map;
-		map = newMap;
-		mapSize = newMapSize;
-	}
-
-	// Resizes the stack to 2x its current size
-	template <typename T>
-	void Stack<T>::resize()
-	{
-		std::size_t newMapSize{ mapSize * 2 };
-		T** newMap{ new T*[newMapSize] };
-		for (std::size_t i{ 0 }; i < mapSize; ++i)
-		{
-			newMap[i] = map[i];
-		}
-		for (std::size_t i{ mapSize }; i < newMapSize; ++i)
-		{
-			newMap[i] = nullptr;
 		}
 		delete[] map;
 		map = newMap;
