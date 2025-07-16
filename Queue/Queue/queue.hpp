@@ -391,8 +391,6 @@ namespace JML
 					newIndex = 0;
 					++newBlock;
 				}
-				frontBlock = startIndex = 0;
-				backBlock = newMapSize - 1;
 				for (std::size_t i{ 0 }; i < mapSize; ++i)
 				{
 					delete[] map[i];
@@ -400,6 +398,8 @@ namespace JML
 				delete[] map;
 				map = newMap;
 				mapSize = newMapSize;
+				frontBlock = startIndex = 0;
+				backBlock = mapSize - 1;
 			}
 		}
 		else
