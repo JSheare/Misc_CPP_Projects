@@ -2,7 +2,6 @@
 #define JML_HASH_TABLE_H
 
 #include <cstddef>
-#include <functional>
 
 namespace JML
 {
