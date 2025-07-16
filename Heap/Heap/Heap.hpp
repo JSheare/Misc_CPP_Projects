@@ -173,7 +173,7 @@ namespace JML
 			T* newItems{ new T[capacity] };
 			for (std::size_t i{ 0 }; i < heapSize; ++i)
 			{
-				newItems[i] = items[i];
+				newItems[i] = static_cast<T&&>(items[i]);
 			}
 			delete[] items;
 			items = newItems;
