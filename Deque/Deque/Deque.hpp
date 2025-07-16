@@ -424,7 +424,7 @@ namespace JML
 		{
 			// 2 for the empty entries at start and end index
 			std::size_t newMapSize{ (numItems + 2) / BLOCKSIZE + ((numItems + 2) % BLOCKSIZE > 0 ? 1 : 0) };
-			T** newMap{ new T * [newMapSize] };
+			T** newMap{ new T*[newMapSize] };
 			std::size_t oldBlock{ frontBlock };
 			std::size_t oldIndex{ startIndex + 1 };
 			if (oldIndex == BLOCKSIZE)
@@ -432,31 +432,57 @@ namespace JML
 				oldBlock = frontBlock + 1;
 				oldIndex = 0;
 			}
-			std::size_t newBlock{ 0 };
+			std::size_t newBlock{ oldBlock };
+			// If the start index has a block to itself, shift into it. Otherwise, shift everything within the occupied blocks
+			if (startIndex == BLOCKSIZE - 1)
+				newBlock = frontBlock;
+
 			std::size_t newIndex{ 1 };  // Leaving one empty for start index
 			std::size_t count{ numItems };
-			while (newBlock < newMapSize)
+			for (std::size_t i{ 0 }; i < newMapSize; ++i)
 			{
-				newMap[newBlock] = new T[BLOCKSIZE];
-				while (newIndex < BLOCKSIZE)
+				// In case the end index needs its own block
+				if (count == 0)
 				{
-					// Leaving one empty for end index
-					if (count == 0)
+					// Using an existing block if we can
+					if (map[newBlock])
 					{
-						backBlock = newBlock;
-						endIndex = newIndex;
-						break;
+						newMap[i] = map[newBlock];
+						map[newBlock] = nullptr;
 					}
-					newMap[newBlock][newIndex] = map[oldBlock][oldIndex];
-					--count;
-					++oldIndex;
-					++newIndex;
-					if (oldIndex == BLOCKSIZE)
+					else
+						newMap[i] = new T[BLOCKSIZE];
+
+					backBlock = i;
+					endIndex = 0;
+					break;
+				}
+				// Shifting everything is only necessary if the start index isn't at the beginning of a block
+				if (startIndex != 0)
+				{
+					while (newIndex < BLOCKSIZE)
 					{
-						oldIndex = 0;
-						++oldBlock;
+						// Leaving one slot empty for the end index
+						if (count == 0)
+						{
+							backBlock = i;
+							endIndex = newIndex;
+							break;
+						}
+						map[newBlock][newIndex] = static_cast<T&&>(map[oldBlock][oldIndex]);
+						--count;
+						++oldIndex;
+						++newIndex;
+						if (oldIndex == BLOCKSIZE)
+						{
+							oldIndex = 0;
+							++oldBlock;
+						}
 					}
 				}
+				// Moving the block to the new map
+				newMap[i] = map[newBlock];
+				map[newBlock] = nullptr;
 				newIndex = 0;
 				++newBlock;
 			}
@@ -583,7 +609,7 @@ namespace JML
 			--startIndex;
 		else
 		{
-			// Attempting to slide everything to the right. Resizing if that isn't possible
+			// If we're at the end of the map, attempting to slide everything to the right. Resizing if that isn't possible
 			if (frontBlock == 0)
 			{
 				bool success{ slide(false) };
@@ -617,7 +643,7 @@ namespace JML
 		++endIndex;
 		if (endIndex == BLOCKSIZE)
 		{
-			// Attempting to slide everything to the left. Resizing if that isn't possible
+			// If we're at the end of the map, attempting to slide everything to the left. Resizing if that isn't possible
 			if (backBlock == mapSize - 1)
 			{
 				bool success{ slide(true) };

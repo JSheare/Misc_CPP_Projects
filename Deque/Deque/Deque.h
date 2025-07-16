@@ -54,8 +54,8 @@ namespace JML
 		std::size_t backBlock{ 0 };
 
 		std::size_t numItems{ 0 };
-		std::size_t startIndex{ 0 };
-		std::size_t endIndex{ 0 };
+		std::size_t startIndex{ 0 };  // Points to one slot before the first element
+		std::size_t endIndex{ 0 };  // Points to one slot after the last element
 
 		std::size_t getBlock(std::size_t offset);
 		std::size_t getIndex(std::size_t offset);
