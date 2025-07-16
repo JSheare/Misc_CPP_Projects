@@ -40,7 +40,7 @@ namespace JML
 
 		std::size_t numItems{ 0 };
 		std::size_t startIndex{ 0 };  // Points to the front item
-		std::size_t endIndex{ 0 };  // Points to one past the back item
+		std::size_t endIndex{ 0 };  // Points to one past the last item
 	};
 }
 #include "Queue.hpp"

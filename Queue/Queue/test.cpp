@@ -14,6 +14,8 @@ int main()
 
     std::cout << '\n';
 
+    queue.shrink_to_fit();
+
     while (!queue.empty())
     {
         std::cout << "Popping: " << queue.front() << '\n';

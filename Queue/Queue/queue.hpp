@@ -335,46 +335,72 @@ namespace JML
 		{
 			// 1 for the empty entry at the end index
 			std::size_t newMapSize{ (numItems + 1) / BLOCKSIZE + ((numItems + 1) % BLOCKSIZE > 0 ? 1 : 0) };
-			T** newMap{ new T * [newMapSize] };
-			// Reducing the number of partially full blocks by copying into the new blocks from beginning to end
-			std::size_t oldBlock{ frontBlock };
-			std::size_t oldIndex{ startIndex };
-			std::size_t newBlock{ 0 };
-			std::size_t newIndex{ 0 };
-			std::size_t count{ numItems };
-			while (newBlock < newMapSize)
+			if (newMapSize < mapSize)
 			{
-				newMap[newBlock] = new T[BLOCKSIZE];
-				while (newIndex < BLOCKSIZE)
+				T** newMap{ new T * [newMapSize] };
+				std::size_t oldBlock{ frontBlock };
+				std::size_t oldIndex{ startIndex };
+				std::size_t newBlock{ frontBlock };
+				std::size_t newIndex{ 0 };
+				std::size_t count{ numItems };
+				for (std::size_t i{ 0 }; i < newMapSize; ++i)
 				{
-					// Leaving one empty for end index
+					// In case the end index needs its own block
 					if (count == 0)
 					{
-						backBlock = newBlock;
-						endIndex = newIndex;
+						// Using an existing block if we can
+						if (map[newBlock])
+						{
+							newMap[i] = map[newBlock];
+							map[newBlock] = nullptr;
+						}
+						else
+							newMap[i] = new T[BLOCKSIZE];
+
+						endIndex = 0;
 						break;
 					}
-					newMap[newBlock][newIndex] = map[oldBlock][oldIndex];
-					--count;
-					++oldIndex;
-					++newIndex;
-					if (oldIndex == BLOCKSIZE)
+					// Shifting everything is only necessary if the start index isn't at the beginning of a block
+					if (startIndex != 0)
 					{
-						oldIndex = 0;
-						++oldBlock;
+						while (newIndex < BLOCKSIZE)
+						{
+							// Leaving one slot empty for the end index
+							if (count == 0)
+							{
+								endIndex = newIndex;
+								break;
+							}
+							map[newBlock][newIndex] = static_cast<T&&>(map[oldBlock][oldIndex]);
+							--count;
+							++oldIndex;
+							++newIndex;
+							if (oldIndex == BLOCKSIZE)
+							{
+								oldIndex = 0;
+								++oldBlock;
+							}
+						}
 					}
+					else
+						count -= BLOCKSIZE;
+
+					// Moving the block to the new map
+					newMap[i] = map[newBlock];
+					map[newBlock] = nullptr;
+					newIndex = 0;
+					++newBlock;
 				}
-				newIndex = 0;
-				++newBlock;
+				frontBlock = startIndex = 0;
+				backBlock = newMapSize - 1;
+				for (std::size_t i{ 0 }; i < mapSize; ++i)
+				{
+					delete[] map[i];
+				}
+				delete[] map;
+				map = newMap;
+				mapSize = newMapSize;
 			}
-			frontBlock = startIndex = 0;
-			for (std::size_t i{ 0 }; i < mapSize; ++i)
-			{
-				delete[] map[i];
-			}
-			delete[] map;
-			map = newMap;
-			mapSize = newMapSize;
 		}
 		else
 		{
