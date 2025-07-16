@@ -259,6 +259,26 @@ namespace JML
 		}
 	}
 
+	// Shrinks the stack to the minimum map size necessary to hold all items
+	template <typename T>
+	void Stack<T>::shrink_to_fit()
+	{
+		std::size_t newMapSize{ topBlock + 1 };
+		T** newMap{ new T*[newMapSize] };
+		for (std::size_t i{ 0 }; i < newMapSize; ++i)
+		{
+			newMap[i] = map[i];
+			map[i] = nullptr;
+		}
+		for (std::size_t i{ newMapSize }; i < mapSize; ++i)
+		{
+			delete[] map[i];
+		}
+		delete[] map;
+		map = newMap;
+		mapSize = newMapSize;
+	}
+
 	// Resizes the stack to 2x its current size
 	template <typename T>
 	void Stack<T>::resize()

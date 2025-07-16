@@ -26,6 +26,7 @@ namespace JML
 		T& top();
 		const T& top() const;
 		void pop();
+		void shrink_to_fit();
 
 	private:
 		static constexpr std::size_t BLOCKSIZE{ 512 / sizeof(T) ? 512 / sizeof(T) : 1 };
@@ -34,7 +35,7 @@ namespace JML
 		std::size_t topBlock{ 0 };
 
 		std::size_t numItems{ 0 };
-		std::size_t topIndex{ 0 };
+		std::size_t topIndex{ 0 };  // Points to one past the top item
 
 		void resize();
 	};

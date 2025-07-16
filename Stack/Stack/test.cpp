@@ -14,6 +14,8 @@ int main()
 
     std::cout << '\n';
 
+    stack.shrink_to_fit();
+
     while (!stack.empty())
     {
         std::cout << "Popping: " << stack.top() << '\n';
